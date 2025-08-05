@@ -1,51 +1,36 @@
+// server/utils/sendEmail.js
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (options) => {
-  // For development, use a test account
-  // In production, use real credentials
-  let transporter;
-  
-  if (process.env.NODE_ENV === 'production') {
-    // Create transporter with real credentials
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    });
-  } else {
-    // Create test account for development
-    const testAccount = await nodemailer.createTestAccount();
-    
-    transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
+  // For development, just log the email instead of sending
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📧 EMAIL WOULD BE SENT:');
+    console.log('To:', options.email);
+    console.log('Subject:', options.subject);
+    console.log('Message:', options.message);
+    return;
   }
 
-  // Send email
+  // Create transporter
+  const transporter = nodemailer.createTransporter({
+    host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
+    port: process.env.SMTP_PORT || 2525,
+    auth: {
+      user: process.env.SMTP_USERNAME || 'your_username',
+      pass: process.env.SMTP_PASSWORD || 'your_password'
+    }
+  });
+
   const message = {
     from: `${process.env.FROM_NAME || 'ScienceVerse'} <${process.env.FROM_EMAIL || 'noreply@scienceverse.com'}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,
-    html: options.html || undefined,
+    html: options.html || options.message
   };
 
   const info = await transporter.sendMail(message);
-
-  // Log URL in development for testing
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-  }
+  console.log('Message sent: %s', info.messageId);
 };
 
 module.exports = sendEmail;

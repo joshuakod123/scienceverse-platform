@@ -1,6 +1,5 @@
-// server/middleware/async.js - CONFIRMED CORRECT
-const asyncHandler = fn => (req, res, next) => {
+// server/middleware/async.js
+const asyncHandler = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
-};
 
 module.exports = asyncHandler;

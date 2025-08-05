@@ -1,107 +1,105 @@
 // server/index.js
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
 const dotenv = require('dotenv');
+const colors = require('colors');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
-const errorHandler = require('./middleware/error');
 
-// Load environment variables
+// Load env vars
 dotenv.config();
 
-// Initialize express app
+// Connect to database
+const connectDB = require('./config/db');
+connectDB();
+
+// Route files
+const auth = require('./routes/auth');
+const users = require('./routes/users');
+const courses = require('./routes/courses');
+const lessons = require('./routes/lessons');
+const payments = require('./routes/payments');
+
 const app = express();
 
-// Middlewares
+// Body parser
 app.use(express.json());
+
+// Cookie parser
 app.use(cookieParser());
+
+// Enable CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CLIENT_URL || 'https://scienceverse.com' 
+    ? process.env.CLIENT_URL 
     : 'http://localhost:3000',
   credentials: true
 }));
 
-// Import routes
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const lessonRoutes = require('./routes/lessons');
-const courseRoutes = require('./routes/courses');
-const paymentRoutes = require('./routes/payments');
+// Set static folder
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Connect to MongoDB with improved error handling
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/scienceverse', {
-  // Remove deprecated options
-  serverSelectionTimeoutMS: 5000, // Add timeout
-  retryWrites: true
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  // Improved error handling
-  if (process.env.NODE_ENV !== 'development') {
-    process.exit(1);
-  }
-});
-
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/lessons', lessonRoutes);
-app.use('/api/courses', courseRoutes);
-app.use('/api/payments', paymentRoutes);
+// Mount routers
+app.use('/api/auth', auth);
+app.use('/api/users', users);
+app.use('/api/courses', courses);
+app.use('/api/lessons', lessons);
+app.use('/api/payments', payments);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV });
+  res.status(200).json({
+    success: true,
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Serve static assets in production
-if (process.env.NODE_ENV === 'production') {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, '../client/build')));
+// Error handler middleware
+const errorHandler = (err, req, res, next) => {
+  let error = { ...err };
+  error.message = err.message;
 
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'build', 'index.html'));
+  // Log to console for dev
+  console.log(err);
+
+  // Mongoose bad ObjectId
+  if (err.name === 'CastError') {
+    const message = 'Resource not found';
+    error = { message, statusCode: 404 };
+  }
+
+  // Mongoose duplicate key
+  if (err.code === 11000) {
+    const message = 'Duplicate field value entered';
+    error = { message, statusCode: 400 };
+  }
+
+  // Mongoose validation error
+  if (err.name === 'ValidationError') {
+    const message = Object.values(err.errors).map(val => val.message);
+    error = { message, statusCode: 400 };
+  }
+
+  res.status(error.statusCode || 500).json({
+    success: false,
+    error: error.message || 'Server Error'
   });
-}
+};
 
-// Error handling middleware
 app.use(errorHandler);
 
-// Set up server with better error handling
 const PORT = process.env.PORT || 5001;
-let server;
 
-try {
-  server = app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  });
-} catch (error) {
-  console.error('Failed to start server:', error);
-  process.exit(1);
-}
+const server = app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold);
+});
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Promise Rejection:', err);
+process.on('unhandledRejection', (err, promise) => {
+  console.log(`Error: ${err.message}`.red);
   // Close server & exit process
-  if (server) {
-    server.close(() => process.exit(1));
-  } else {
+  server.close(() => {
     process.exit(1);
-  }
+  });
 });
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  if (server) {
-    server.close(() => process.exit(1));
-  } else {
-    process.exit(1);
-  }
-});
-
-module.exports = server; // For testing purposes
