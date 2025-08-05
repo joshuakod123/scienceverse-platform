@@ -12,6 +12,7 @@ const ProtectedRoute = ({ children }) => {
       const devBypass = localStorage.getItem('devAuthBypass') === 'true';
       
       if (devBypass) {
+        console.warn('Authentication bypassed for development.');
         const mockUser = {
           id: 'dev-123',
           username: 'DevUser',

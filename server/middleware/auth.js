@@ -1,4 +1,7 @@
 const jwt = require('jsonwebtoken');
+const asyncHandler = require('./async'); // asyncHandler 추가
+const User = require('../models/User'); // User 모델 추가
+const ErrorResponse = require('../utils/errorResponse'); // ErrorResponse 추가
 
 // Ensure JWT_SECRET is mandatory in production
 const JWT_SECRET = process.env.NODE_ENV === 'production' 
@@ -43,3 +46,18 @@ exports.protect = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Not authorized', 401));
   }
 });
+
+// Grant access to specific roles
+exports.authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorResponse(
+          `User role ${req.user.role} is not authorized to access this route`,
+          403
+        )
+      );
+    }
+    next();
+  };
+};

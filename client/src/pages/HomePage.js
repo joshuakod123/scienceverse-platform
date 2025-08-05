@@ -90,8 +90,10 @@ const HomePage = () => {
   
   // Handle logout function
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout();
+      navigate('/');
+    }
   };
   
   // Animation variants

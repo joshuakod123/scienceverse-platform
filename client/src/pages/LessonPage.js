@@ -246,6 +246,7 @@ const LessonPage = () => {
   
   // Handle logout function
   const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
     logout();
     navigate('/');
   };
