@@ -1,0 +1,227 @@
+/* SurveyPage.css */
+:root {
+    --dutch-white: #EFDFBB;
+    --wine: #722F37;
+    --space-blue: #0B1026;
+    --space-blue-light: #1A2348;
+    --space-purple: #1E0538;
+    --accent-orange: #E85A4F;
+    --text-light: #FFF;
+  }
+  
+  .survey-page {
+    min-height: 100vh;
+    background-color: var(--space-blue);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    background-image: radial-gradient(circle at top right, var(--space-purple), transparent 70%),
+                      radial-gradient(circle at bottom left, rgba(114, 47, 55, 0.3), transparent 50%);
+  }
+  
+  /* Stars background */
+  .stars-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(2px 2px at 40px 60px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 20px 50px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 30px 100px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 40px 60px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 110px 90px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 190px 150px, #fff, rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    z-index: 1;
+    opacity: 0.3;
+  }
+  
+  .survey-container {
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 600px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .progress-bar {
+    height: 6px;
+    background-color: #f0f0f0;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background-color: var(--wine);
+    transition: width 0.4s ease;
+  }
+  
+  .survey-content {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .survey-content h2 {
+    margin: 0 0 15px 0;
+    color: var(--space-blue);
+    font-size: 28px;
+    font-weight: 700;
+  }
+  
+  .survey-content p {
+    margin: 0 0 30px 0;
+    color: #555;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  .form-group {
+    margin-bottom: 30px;
+  }
+  
+  .survey-input {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    border: 2px solid #eaeaea;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .survey-input:focus {
+    outline: none;
+    border-color: var(--wine);
+    box-shadow: 0 0 0 3px rgba(114, 47, 55, 0.1);
+  }
+  
+  .option-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .goal-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .option-card {
+    background-color: #f8f8f8;
+    border: 2px solid #eaeaea;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .option-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: #ddd;
+  }
+  
+  .option-card.selected {
+    border-color: var(--wine);
+    background-color: rgba(114, 47, 55, 0.05);
+  }
+  
+  .option-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  
+  .option-label {
+    font-weight: 500;
+    color: var(--space-blue);
+  }
+  
+  .survey-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .btn-back {
+    background-color: transparent;
+    border: 2px solid #eaeaea;
+    color: #666;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-back:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .btn-next, .btn-submit {
+    background-color: var(--wine);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-next:hover, .btn-submit:hover {
+    background-color: #602730;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(114, 47, 55, 0.2);
+  }
+  
+  .btn-next:disabled, .btn-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Just show one button centered if there's no back button */
+  .survey-actions:has(.btn-next:only-child),
+  .survey-actions:has(.btn-submit:only-child) {
+    justify-content: center;
+  }
+  
+  /* Media Queries */
+  @media (max-width: 640px) {
+    .survey-content {
+      padding: 30px 20px;
+    }
+    
+    .survey-content h2 {
+      font-size: 24px;
+    }
+    
+    .option-cards {
+      grid-template-columns: 1fr;
+    }
+    
+    .option-card {
+      padding: 15px;
+    }
+    
+    .btn-back, .btn-next, .btn-submit {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+  }

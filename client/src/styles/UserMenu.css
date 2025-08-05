@@ -1,0 +1,53 @@
+/* User dropdown menu styles - add these to your App.css */
+
+/* For the avatar dropdown container */
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  /* Styling for the user menu */
+  .user-menu {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    z-index: 100;
+    overflow: hidden;
+  }
+  
+  /* Styling for menu items */
+  .user-menu-item {
+    padding: 10px 15px;
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 14px;
+  }
+  
+  .user-menu-item:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* Special styling for logout button */
+  .user-menu-item.logout {
+    color: var(--wine);
+    border-top: 1px solid #eee;
+  }
+  
+  /* Make user avatar clickable */
+  .user-avatar {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .user-avatar:hover {
+    transform: scale(1.05);
+  }
