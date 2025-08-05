@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const asyncHandler = require('./async'); // asyncHandler 추가
-const User = require('../models/User'); // User 모델 추가
-const ErrorResponse = require('../utils/errorResponse'); // ErrorResponse 추가
+const asyncHandler = require('./async');
+const User = require('../models/User');
+const ErrorResponse = require('../utils/errorResponse');
 
 // Ensure JWT_SECRET is mandatory in production
 const JWT_SECRET = process.env.NODE_ENV === 'production' 

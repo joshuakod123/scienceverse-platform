@@ -10,7 +10,7 @@ const DashboardPage = () => {
   const [currentLesson, setCurrentLesson] = useState(null);
   const [loading, setLoading] = useState(true);
   const { currentUser, logout } = useContext(AuthContext);
-  const { userCourses, hasPreDefinedCourses, loading: coursesLoading } = useContext(CourseContext);
+  const { userCourses, loading: coursesLoading } = useContext(CourseContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,11 +29,11 @@ const DashboardPage = () => {
   }, [userCourses, coursesLoading]);
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
+    if (window.confirm('Are you sure you want to log out?')) {
         logout();
         navigate('/');
     }
-};
+  };
 
   const handleLessonSelect = (lesson) => {
     setCurrentLesson(lesson);
@@ -45,11 +45,6 @@ const DashboardPage = () => {
   
   const handleDiscoverClick = () => {
     navigate('/discover');
-  };
-
-  // Format listener count to show actual numbers instead of "K" format
-  const formatListeners = (count) => {
-    return new Intl.NumberFormat().format(count);
   };
 
   // Get user's display name - preferring fullName if available

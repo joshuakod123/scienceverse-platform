@@ -1,15 +1,127 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { CourseContext } from '../context/CourseContext';
 import '../styles/LessonPage.css';
 
+// Create mock lesson data for development (moved outside the component)
+const createMockLesson = (lessonId) => {
+  return {
+    _id: lessonId || "1",
+    title: "Introduction to Physics",
+    subtitle: "Basic concepts and principles",
+    description: "Learn about forces, motion, and energy in this introductory course.",
+    category: "Physics",
+    level: "Beginner",
+    duration: 45,
+    author: "Dr. Richard Feynman",
+    courseId: "course123",
+    sections: [
+      {
+        title: "Introduction to Forces",
+        content: `
+          <h3>What are Forces?</h3>
+          <p>Forces are interactions that, when unopposed, will change the motion of an object. The motion of an object is determined by the sum of the forces acting on it; if the total force on an object is not zero, its motion will change.</p>
+          <p>The SI unit for force is the newton (N), which is defined as 1 kilogram meter per second squared (kg·m/s²).</p>
+          
+          <h3>Newton's Three Laws of Motion</h3>
+          <p>Sir Isaac Newton's three laws of motion describe the relationship between a body and the forces acting upon it, and its motion in response to those forces.</p>
+          <ul>
+            <li><strong>First Law:</strong> An object at rest stays at rest, and an object in motion stays in motion with the same speed and in the same direction unless acted upon by an external force.</li>
+            <li><strong>Second Law:</strong> The acceleration of an object is directly proportional to the net force acting on it and inversely proportional to its mass.</li>
+            <li><strong>Third Law:</strong> For every action, there is an equal and opposite reaction.</li>
+          </ul>
+        `,
+        order: 1,
+        quizzes: [
+          {
+            question: "What is the SI unit of force?",
+            options: ["Kilogram", "Newton", "Joule", "Watt"],
+            correctAnswer: 1
+          },
+          {
+            question: "Which of Newton's laws states that an object at rest will stay at rest unless acted upon by an external force?",
+            options: ["First Law", "Second Law", "Third Law", "Fourth Law"],
+            correctAnswer: 0
+          }
+        ]
+      },
+      {
+        title: "Types of Forces",
+        content: `
+          <h3>Fundamental Forces</h3>
+          <p>In physics, there are four fundamental forces that govern all interactions in the universe:</p>
+          <ul>
+            <li><strong>Gravitational Force:</strong> The weakest of the four forces, but has an infinite range. It is always attractive and acts between any two objects with mass.</li>
+            <li><strong>Electromagnetic Force:</strong> Acts between electrically charged particles. It is both attractive and repulsive and has infinite range.</li>
+            <li><strong>Strong Nuclear Force:</strong> Holds protons and neutrons together in the nucleus. It is the strongest force but has a very short range.</li>
+            <li><strong>Weak Nuclear Force:</strong> Responsible for radioactive decay and nuclear fusion. It has a very short range.</li>
+          </ul>
+
+          <h3>Contact Forces</h3>
+          <p>These are forces that act when objects physically touch:</p>
+          <ul>
+            <li><strong>Normal Force:</strong> The perpendicular force exerted by a surface on an object.</li>
+            <li><strong>Frictional Force:</strong> The force that opposes motion between two surfaces in contact.</li>
+            <li><strong>Tension Force:</strong> The force transmitted through a string, rope, or cable when it is pulled tight.</li>
+          </ul>
+        `,
+        order: 2,
+        quizzes: [
+          {
+            question: "Which is the weakest of the four fundamental forces?",
+            options: ["Gravitational", "Electromagnetic", "Strong Nuclear", "Weak Nuclear"],
+            correctAnswer: 0
+          },
+          {
+            question: "Which force opposes motion between two surfaces in contact?",
+            options: ["Normal Force", "Tension Force", "Frictional Force", "Spring Force"],
+            correctAnswer: 2
+          }
+        ]
+      },
+      {
+        title: "Motion and Energy",
+        content: `
+          <h3>Kinetic and Potential Energy</h3>
+          <p>Energy is the capacity to do work. The two main forms of mechanical energy are:</p>
+          <ul>
+            <li><strong>Kinetic Energy:</strong> The energy an object possesses due to its motion. It is calculated using the formula KE = (1/2)mv², where m is mass and v is velocity.</li>
+            <li><strong>Potential Energy:</strong> The energy stored in an object due to its position or state. Gravitational potential energy is calculated using PE = mgh, where m is mass, g is gravitational acceleration, and h is height.</li>
+          </ul>
+
+          <h3>Conservation of Energy</h3>
+          <p>One of the most fundamental principles in physics is the law of conservation of energy, which states that energy cannot be created or destroyed, only transformed from one form to another.</p>
+          <p>In a closed system, the total energy remains constant. This principle allows us to track energy transformations and solve complex physics problems.</p>
+        `,
+        order: 3,
+        quizzes: [
+          {
+            question: "What is the formula for kinetic energy?",
+            options: ["KE = mv", "KE = (1/2)mv²", "KE = mgh", "KE = m²v"],
+            correctAnswer: 1
+          },
+          {
+            question: "According to the law of conservation of energy:",
+            options: [
+              "Energy can be created but not destroyed",
+              "Energy can be destroyed but not created",
+              "Energy cannot be created or destroyed",
+              "Energy can be created and destroyed"
+            ],
+            correctAnswer: 2
+          }
+        ]
+      }
+    ]
+  };
+};
+
 const LessonPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentUser, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const { isCoursePaid } = useContext(CourseContext);
   
   const [lesson, setLesson] = useState(null);
@@ -39,7 +151,7 @@ const LessonPage = () => {
   }, []);
   
   useEffect(() => {
-    const fetchLesson = async () => {
+    const fetchLesson = () => {
       try {
         setLoading(true);
         
@@ -70,131 +182,15 @@ const LessonPage = () => {
     fetchLesson();
   }, [id, isCoursePaid]);
   
-  // Create mock lesson data for development
-  const createMockLesson = (lessonId) => {
-    return {
-      _id: lessonId || "1",
-      title: "Introduction to Physics",
-      subtitle: "Basic concepts and principles",
-      description: "Learn about forces, motion, and energy in this introductory course.",
-      category: "Physics",
-      level: "Beginner",
-      duration: 45,
-      author: "Dr. Richard Feynman",
-      courseId: "course123",
-      sections: [
-        {
-          title: "Introduction to Forces",
-          content: `
-            <h3>What are Forces?</h3>
-            <p>Forces are interactions that, when unopposed, will change the motion of an object. The motion of an object is determined by the sum of the forces acting on it; if the total force on an object is not zero, its motion will change.</p>
-            <p>The SI unit for force is the newton (N), which is defined as 1 kilogram meter per second squared (kg·m/s²).</p>
-            
-            <h3>Newton's Three Laws of Motion</h3>
-            <p>Sir Isaac Newton's three laws of motion describe the relationship between a body and the forces acting upon it, and its motion in response to those forces.</p>
-            <ul>
-              <li><strong>First Law:</strong> An object at rest stays at rest, and an object in motion stays in motion with the same speed and in the same direction unless acted upon by an external force.</li>
-              <li><strong>Second Law:</strong> The acceleration of an object is directly proportional to the net force acting on it and inversely proportional to its mass.</li>
-              <li><strong>Third Law:</strong> For every action, there is an equal and opposite reaction.</li>
-            </ul>
-          `,
-          order: 1,
-          quizzes: [
-            {
-              question: "What is the SI unit of force?",
-              options: ["Kilogram", "Newton", "Joule", "Watt"],
-              correctAnswer: 1
-            },
-            {
-              question: "Which of Newton's laws states that an object at rest will stay at rest unless acted upon by an external force?",
-              options: ["First Law", "Second Law", "Third Law", "Fourth Law"],
-              correctAnswer: 0
-            }
-          ]
-        },
-        {
-          title: "Types of Forces",
-          content: `
-            <h3>Fundamental Forces</h3>
-            <p>In physics, there are four fundamental forces that govern all interactions in the universe:</p>
-            <ul>
-              <li><strong>Gravitational Force:</strong> The weakest of the four forces, but has an infinite range. It is always attractive and acts between any two objects with mass.</li>
-              <li><strong>Electromagnetic Force:</strong> Acts between electrically charged particles. It is both attractive and repulsive and has infinite range.</li>
-              <li><strong>Strong Nuclear Force:</strong> Holds protons and neutrons together in the nucleus. It is the strongest force but has a very short range.</li>
-              <li><strong>Weak Nuclear Force:</strong> Responsible for radioactive decay and nuclear fusion. It has a very short range.</li>
-            </ul>
-
-            <h3>Contact Forces</h3>
-            <p>These are forces that act when objects physically touch:</p>
-            <ul>
-              <li><strong>Normal Force:</strong> The perpendicular force exerted by a surface on an object.</li>
-              <li><strong>Frictional Force:</strong> The force that opposes motion between two surfaces in contact.</li>
-              <li><strong>Tension Force:</strong> The force transmitted through a string, rope, or cable when it is pulled tight.</li>
-            </ul>
-          `,
-          order: 2,
-          quizzes: [
-            {
-              question: "Which is the weakest of the four fundamental forces?",
-              options: ["Gravitational", "Electromagnetic", "Strong Nuclear", "Weak Nuclear"],
-              correctAnswer: 0
-            },
-            {
-              question: "Which force opposes motion between two surfaces in contact?",
-              options: ["Normal Force", "Tension Force", "Frictional Force", "Spring Force"],
-              correctAnswer: 2
-            }
-          ]
-        },
-        {
-          title: "Motion and Energy",
-          content: `
-            <h3>Kinetic and Potential Energy</h3>
-            <p>Energy is the capacity to do work. The two main forms of mechanical energy are:</p>
-            <ul>
-              <li><strong>Kinetic Energy:</strong> The energy an object possesses due to its motion. It is calculated using the formula KE = (1/2)mv², where m is mass and v is velocity.</li>
-              <li><strong>Potential Energy:</strong> The energy stored in an object due to its position or state. Gravitational potential energy is calculated using PE = mgh, where m is mass, g is gravitational acceleration, and h is height.</li>
-            </ul>
-
-            <h3>Conservation of Energy</h3>
-            <p>One of the most fundamental principles in physics is the law of conservation of energy, which states that energy cannot be created or destroyed, only transformed from one form to another.</p>
-            <p>In a closed system, the total energy remains constant. This principle allows us to track energy transformations and solve complex physics problems.</p>
-          `,
-          order: 3,
-          quizzes: [
-            {
-              question: "What is the formula for kinetic energy?",
-              options: ["KE = mv", "KE = (1/2)mv²", "KE = mgh", "KE = m²v"],
-              correctAnswer: 1
-            },
-            {
-              question: "According to the law of conservation of energy:",
-              options: [
-                "Energy can be created but not destroyed",
-                "Energy can be destroyed but not created",
-                "Energy cannot be created or destroyed",
-                "Energy can be created and destroyed"
-              ],
-              correctAnswer: 2
-            }
-          ]
-        }
-      ]
-    };
-  };
-  
-  const updateProgress = async () => {
-    try {
+  const updateProgress = () => {
+    if (lesson) {
       const sectionProgress = ((currentSection + 1) / lesson.sections.length) * 100;
       setProgress(sectionProgress);
-    } catch (error) {
-      console.error('Error updating progress:', error);
-      // Continue without showing error to user
     }
   };
   
   const handleNextSection = () => {
-    if (currentSection < lesson.sections.length - 1) {
+    if (lesson && currentSection < lesson.sections.length - 1) {
       setCurrentSection(currentSection + 1);
       updateProgress();
       setShowQuiz(false);
@@ -205,6 +201,7 @@ const LessonPage = () => {
   const handlePrevSection = () => {
     if (currentSection > 0) {
       setCurrentSection(currentSection - 1);
+      updateProgress();
       setShowQuiz(false);
       setQuizResults(null);
     }
@@ -246,9 +243,10 @@ const LessonPage = () => {
   
   // Handle logout function
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-    logout();
-    navigate('/');
+    if (window.confirm('Are you sure you want to log out?')) {
+        logout();
+        navigate('/');
+    }
   };
   
   // Add a prompt to purchase if content is limited
@@ -272,6 +270,7 @@ const LessonPage = () => {
   
   // Render content based on access level
   const renderContent = () => {
+    const currentSectionData = lesson.sections[currentSection];
     if (contentAccess === 'full' || currentSection < 2) { // First section is free
       return (
         <div 
@@ -352,7 +351,6 @@ const LessonPage = () => {
                 alt="User profile" 
                 style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} 
                 onError={(e) => {
-                  // If image fails to load, use a default avatar
                   e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzMzMyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MyLjIxIDAgNCAxLjc5IDQgNHMtMS43OSA0LTQgNC00LTEuNzktNC00IDEuNzktNCA0LTR6bTAgMTMuOTljLTMuNSAwLTYuNTgtMS44LTguMzYtNC41MyAxLjg0LTIuNzMgNC45NS00LjQ2IDguMzYtNC40NiAzLjQgMCA2LjUyIDEuNzMgOC4zNiA0LjQ2LTEuNzggMi43My00Ljg1IDQuNTMtOC4zNiA0LjUzeiIvPjwvc3ZnPg==';
                 }}
               />
@@ -417,10 +415,8 @@ const LessonPage = () => {
           >
             <h2>{currentSectionData.title}</h2>
             
-            {/* Render content based on access */}
             {renderContent()}
             
-            {/* Purchase prompt */}
             {renderPurchasePrompt()}
             
             {currentSectionData.quizzes && currentSectionData.quizzes.length > 0 && (
