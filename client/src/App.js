@@ -2,20 +2,20 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CourseProvider } from './context/CourseContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 // Pages
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import DiscoverPage from './pages/DiscoverPage';
-import CoursePage from './pages/CoursePage';
-import LessonPage from './pages/LessonPage';
-import ProfilePage from './pages/ProfilePage';
-import ProgressPage from './pages/ProgressPage';
+// import CoursePage from './pages/CoursePage';
+// import LessonPage from './pages/LessonPage';
+// import ProfilePage from './pages/ProfilePage';
+// import ProgressPage from './pages/ProgressPage';
 
 // Styles
-import './App.css';
+import './styles/App.css';
 
 function App() {
   return (
@@ -41,6 +41,8 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              {/* 임시로 주석 처리 - 해당 컴포넌트들이 없는 경우 */}
+              {/*
               <Route path="/course/:id" element={
                 <ProtectedRoute>
                   <CoursePage />
@@ -64,6 +66,7 @@ function App() {
                   <ProgressPage />
                 </ProtectedRoute>
               } />
+              */}
               
               <Route path="/courses" element={
                 <ProtectedRoute>
