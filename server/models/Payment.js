@@ -1,4 +1,3 @@
-// server/models/Payment.js
 const mongoose = require('mongoose');
 
 const PaymentSchema = new mongoose.Schema({
@@ -18,7 +17,8 @@ const PaymentSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'USD'
+    enum: ['KRW', 'USD'],
+    default: 'KRW'
   },
   status: {
     type: String,
@@ -27,10 +27,19 @@ const PaymentSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
+    enum: ['toss', 'card', 'bank'],
     required: [true, 'Please specify payment method']
+  },
+  orderId: {
+    type: String,
+    required: true,
+    unique: true
   },
   transactionId: {
     type: String
+  },
+  tossPaymentData: {
+    type: Object // 토스페이먼츠 응답 데이터 저장
   },
   createdAt: {
     type: Date,

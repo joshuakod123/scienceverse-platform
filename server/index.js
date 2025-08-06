@@ -1,4 +1,3 @@
-// server/index.js
 const express = require('express');
 const dotenv = require('dotenv');
 const colors = require('colors');
@@ -19,6 +18,9 @@ const users = require('./routes/users');
 const courses = require('./routes/courses');
 const lessons = require('./routes/lessons');
 const payments = require('./routes/payments');
+
+// Import error handler
+const errorHandler = require('./middleware/error');
 
 const app = express();
 
@@ -51,42 +53,12 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Server is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: 'Connected'
   });
 });
 
-// Error handler middleware
-const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.message = err.message;
-
-  // Log to console for dev
-  console.log(err);
-
-  // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
-    const message = 'Resource not found';
-    error = { message, statusCode: 404 };
-  }
-
-  // Mongoose duplicate key
-  if (err.code === 11000) {
-    const message = 'Duplicate field value entered';
-    error = { message, statusCode: 400 };
-  }
-
-  // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message);
-    error = { message, statusCode: 400 };
-  }
-
-  res.status(error.statusCode || 500).json({
-    success: false,
-    error: error.message || 'Server Error'
-  });
-};
-
+// Error handler middleware (사용 외부 파일)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
@@ -98,7 +70,6 @@ const server = app.listen(PORT, () => {
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
   console.log(`Error: ${err.message}`.red);
-  // Close server & exit process
   server.close(() => {
     process.exit(1);
   });

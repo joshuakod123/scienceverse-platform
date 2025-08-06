@@ -1,106 +1,125 @@
+const asyncHandler = require('../middleware/async');
+const ErrorResponse = require('../utils/errorResponse');
 const Payment = require('../models/Payment');
 const Course = require('../models/Course');
-const User = require('../models/User');
-const ErrorResponse = require('../utils/errorResponse');
-const asyncHandler = require('../middleware/async');
+const axios = require('axios');
 
-// Helper function to enroll a user in a course
-const enrollUserInCourse = async (userId, courseId) => {
-  const user = await User.findById(userId);
-  if (!user) {
-    console.error(`Enrollment failed: User not found with id of ${userId}`);
-    return;
-  }
-
-  const alreadyEnrolled = user.enrolledCourses.some(
-    enrollment => enrollment.courseId.toString() === courseId.toString()
-  );
-
-  if (!alreadyEnrolled) {
-    user.enrolledCourses.push({ courseId });
-    await user.save();
-    await Course.findByIdAndUpdate(courseId, { $inc: { students: 1 } });
-  }
-};
-
-// @desc    Get all payments for a user
-// @route   GET /api/payments/user
+// @desc    토스페이먼츠 결제 요청
+// @route   POST /api/payments/toss/request
 // @access  Private
-exports.getPayments = asyncHandler(async (req, res, next) => {
-    const payments = await Payment.find({ userId: req.user.id })
-      .populate('courseId', 'title price')
-      .sort('-createdAt');
-  
-    res.status(200).json({
-      success: true,
-      count: payments.length,
-      data: payments
-    });
-  });
+exports.createTossPayment = asyncHandler(async (req, res, next) => {
+  const { courseId, amount, orderId, customerName, customerEmail } = req.body;
 
-// @desc    Get a single payment
-// @route   GET /api/payments/:id
-// @access  Private
-exports.getPayment = asyncHandler(async (req, res, next) => {
-  const payment = await Payment.findById(req.params.id).populate('courseId', 'title price');
-
-  if (!payment) {
-    return next(new ErrorResponse(`Payment not found with id of ${req.params.id}`, 404));
-  }
-
-  if (payment.userId.toString() !== req.user.id && req.user.role !== 'admin') {
-    return next(new ErrorResponse('Not authorized to access this payment', 403));
-  }
-
-  res.status(200).json({ success: true, data: payment });
-});
-
-// @desc    Create a new payment
-// @route   POST /api/payments/create
-// @access  Private
-exports.createPayment = asyncHandler(async (req, res, next) => {
-  req.body.userId = req.user.id;
-  const { courseId, amount } = req.body;
-
+  // 코스 확인
   const course = await Course.findById(courseId);
   if (!course) {
-    return next(new ErrorResponse(`Course not found with id of ${courseId}`, 404));
+    return next(new ErrorResponse('Course not found', 404));
   }
 
-  // Use course price from DB as the source of truth
-  req.body.amount = course.price;
+  // 결제 정보 저장
+  const payment = await Payment.create({
+    userId: req.user.id,
+    courseId,
+    amount: course.price, // DB의 실제 가격 사용
+    currency: 'KRW',
+    status: 'pending',
+    paymentMethod: 'toss',
+    orderId
+  });
 
-  const payment = await Payment.create(req.body);
+  // 토스페이먼츠 결제 요청 데이터
+  const paymentData = {
+    amount: course.price,
+    orderId: orderId,
+    orderName: course.title,
+    customerName: customerName,
+    customerEmail: customerEmail,
+    successUrl: `${process.env.CLIENT_URL}/payment/success`,
+    failUrl: `${process.env.CLIENT_URL}/payment/fail`
+  };
 
-  if (payment.status === 'completed') {
-    await enrollUserInCourse(payment.userId, payment.courseId);
-  }
-
-  res.status(201).json({ success: true, data: payment });
+  res.status(201).json({
+    success: true,
+    data: {
+      payment,
+      paymentData,
+      clientKey: process.env.TOSS_CLIENT_KEY
+    }
+  });
 });
 
-// @desc    Process payment webhook
-// @route   POST /api/payments/webhook
+// @desc    토스페이먼츠 결제 승인
+// @route   POST /api/payments/toss/confirm
 // @access  Public
-exports.processPaymentWebhook = asyncHandler(async (req, res, next) => {
-  // Logic to handle webhooks from payment providers like Stripe
-  // This is a placeholder for a real implementation
-  console.log('Webhook received:', req.body);
-  res.status(200).json({ success: true, message: 'Webhook received' });
+exports.confirmTossPayment = asyncHandler(async (req, res, next) => {
+  const { paymentKey, orderId, amount } = req.body;
+
+  try {
+    // 토스페이먼츠 API 호출
+    const response = await axios.post(
+      'https://api.tosspayments.com/v1/payments/confirm',
+      {
+        paymentKey,
+        orderId,
+        amount
+      },
+      {
+        headers: {
+          'Authorization': `Basic ${Buffer.from(process.env.TOSS_SECRET_KEY + ':').toString('base64')}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    // 결제 정보 업데이트
+    const payment = await Payment.findOneAndUpdate(
+      { orderId },
+      {
+        status: 'completed',
+        transactionId: paymentKey,
+        tossPaymentData: response.data
+      },
+      { new: true }
+    );
+
+    if (!payment) {
+      return next(new ErrorResponse('Payment not found', 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        payment,
+        tossResponse: response.data
+      }
+    });
+
+  } catch (error) {
+    console.error('Toss payment confirmation error:', error.response?.data || error.message);
+    
+    // 결제 실패 상태로 업데이트
+    await Payment.findOneAndUpdate(
+      { orderId },
+      { status: 'failed' }
+    );
+
+    return next(new ErrorResponse('Payment confirmation failed', 400));
+  }
 });
 
-// @desc    Check if user has paid for a course
+// @desc    결제 상태 확인
 // @route   GET /api/payments/check/:courseId
 // @access  Private
 exports.checkPaymentStatus = asyncHandler(async (req, res, next) => {
-    const payment = await Payment.findOne({
-      userId: req.user.id,
-      courseId: req.params.courseId,
-      status: 'completed'
-    });
-  
-    res.status(200).json({
-      success: true,
-      isPaid: !!payment
-    });
+  const payment = await Payment.findOne({
+    userId: req.user.id,
+    courseId: req.params.courseId,
+    status: 'completed'
   });
+
+  res.status(200).json({
+    success: true,
+    isPaid: !!payment,
+    payment: payment || null
+  });
+});
