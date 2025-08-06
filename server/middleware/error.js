@@ -1,4 +1,4 @@
-// server/middleware/error.js - CORRECTED VERSION
+// server/middleware/error.js
 const ErrorResponse = require('../utils/errorResponse');
 
 const errorHandler = (err, req, res, next) => {
