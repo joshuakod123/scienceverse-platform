@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // Clear local storage and state
       localStorage.removeItem('token');
+      localStorage.removeItem('mock_user');
       delete axios.defaults.headers.common['Authorization'];
       setCurrentUser(null);
       setError(null);
@@ -46,13 +47,31 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
+        // Check for mock user in development
+        if (process.env.NODE_ENV === 'development') {
+          const mockUser = localStorage.getItem('mock_user');
+          if (mockUser) {
+            try {
+              const parsedUser = JSON.parse(mockUser);
+              setCurrentUser(parsedUser);
+            } catch (error) {
+              localStorage.removeItem('mock_user');
+            }
+          }
+        }
         setIsLoading(false);
         return;
       }
 
+      // Set axios header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
       // Verify token with backend
-      const response = await axios.get(`${API_BASE_URL}/auth/verify`);
-      if (response.data.user) {
+      const response = await axios.get(`${API_BASE_URL}/auth/me`);
+      
+      if (response.data && response.data.success) {
+        setCurrentUser(response.data.data);
+      } else if (response.data.user) {
         setCurrentUser(response.data.user);
       }
     } catch (error) {
@@ -65,13 +84,8 @@ export const AuthProvider = ({ children }) => {
     }
   }, [API_BASE_URL]);
 
-  // Configure axios defaults
+  // Configure axios defaults and interceptors
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-    
     // Add response interceptor to handle token expiration
     const responseInterceptor = axios.interceptors.response.use(
       (response) => response,
@@ -99,6 +113,11 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
+      // Use mock login in development
+      if (process.env.NODE_ENV === 'development') {
+        return await mockLogin(email, password);
+      }
+
       const response = await axios.post(`${API_BASE_URL}/auth/login`, {
         email,
         password
@@ -118,7 +137,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error:', error);
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error || 
-                          '로그인 중 오류가 발생했습니다.';
+                          'An error occurred during login.';
       setError(errorMessage);
       return false;
     } finally {
@@ -130,6 +149,11 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoading(true);
       setError(null);
+
+      // Use mock register in development
+      if (process.env.NODE_ENV === 'development') {
+        return await mockRegister(username, email, password);
+      }
 
       const response = await axios.post(`${API_BASE_URL}/auth/register`, {
         username,
@@ -151,7 +175,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Registration error:', error);
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error || 
-                          '회원가입 중 오류가 발생했습니다.';
+                          'An error occurred during registration.';
       setError(errorMessage);
       return false;
     } finally {
@@ -164,15 +188,35 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-      const response = await axios.put(`${API_BASE_URL}/auth/profile`, profileData);
+      // Update mock user in development
+      if (process.env.NODE_ENV === 'development' && currentUser) {
+        const updatedUser = { ...currentUser, ...profileData };
+        setCurrentUser(updatedUser);
+        localStorage.setItem('mock_user', JSON.stringify(updatedUser));
+        return true;
+      }
+
+      const response = await axios.put(`${API_BASE_URL}/auth/updatedetails`, {
+        username: profileData.username,
+        email: profileData.email,
+        fullName: profileData.fullName,
+        bio: profileData.bio,
+        language: profileData.language,
+        timezone: profileData.timezone,
+        notifications: profileData.notifications
+      });
       
-      setCurrentUser(response.data.user);
-      return true;
+      if (response.data && response.data.success) {
+        setCurrentUser(response.data.data);
+        return true;
+      } else {
+        throw new Error('Profile update failed');
+      }
     } catch (error) {
       console.error('Profile update error:', error);
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error || 
-                          '프로필 업데이트 중 오류가 발생했습니다.';
+                          'Failed to update profile.';
       setError(errorMessage);
       return false;
     } finally {
@@ -180,22 +224,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const changePassword = async (currentPassword, newPassword) => {
+  const updatePassword = async (currentPassword, newPassword) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      await axios.put(`${API_BASE_URL}/auth/change-password`, {
+      // Mock success in development
+      if (process.env.NODE_ENV === 'development') {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return true;
+      }
+
+      const response = await axios.put(`${API_BASE_URL}/auth/updatepassword`, {
         currentPassword,
         newPassword
       });
       
-      return true;
+      if (response.data && response.data.success) {
+        return true;
+      } else {
+        throw new Error('Password update failed');
+      }
     } catch (error) {
-      console.error('Password change error:', error);
+      console.error('Password update error:', error);
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error || 
-                          '비밀번호 변경 중 오류가 발생했습니다.';
+                          'Failed to update password.';
       setError(errorMessage);
       return false;
     } finally {
@@ -203,38 +257,60 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const resetPassword = async (email) => {
+  const forgotPassword = async (email) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      await axios.post(`${API_BASE_URL}/auth/reset-password`, { email });
-      return true;
+      const response = await axios.post(`${API_BASE_URL}/auth/forgotpassword`, {
+        email
+      });
+      
+      if (response.data && response.data.success) {
+        return { success: true, message: response.data.data };
+      } else {
+        throw new Error('Password reset request failed');
+      }
     } catch (error) {
-      console.error('Password reset error:', error);
+      console.error('Forgot password error:', error);
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error || 
-                          '비밀번호 재설정 요청 중 오류가 발생했습니다.';
+                          'Failed to send password reset email.';
       setError(errorMessage);
-      return false;
+      return { success: false, message: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const refreshToken = async () => {
+  const resetPassword = async (resetToken, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`);
-      const { token } = response.data;
+      setIsLoading(true);
+      setError(null);
+
+      const response = await axios.put(`${API_BASE_URL}/auth/resetpassword/${resetToken}`, {
+        password
+      });
       
+      const { token, user } = response.data;
+
+      // Store new token
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      // Set user data
+      setCurrentUser(user);
       
       return true;
     } catch (error) {
-      console.error('Token refresh failed:', error);
-      logout();
+      console.error('Reset password error:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          'Failed to reset password.';
+      setError(errorMessage);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -246,7 +322,15 @@ export const AuthProvider = ({ children }) => {
           id: 'mock_user_1',
           username: 'testuser',
           email: email,
-          fullName: '테스트 사용자',
+          fullName: 'Test User',
+          bio: '',
+          language: 'en',
+          timezone: 'UTC',
+          notifications: {
+            email: true,
+            push: true,
+            marketing: false
+          },
           profilePicture: null,
           createdAt: new Date().toISOString(),
           lastLogin: new Date().toISOString()
@@ -267,6 +351,14 @@ export const AuthProvider = ({ children }) => {
           username: username,
           email: email,
           fullName: username,
+          bio: '',
+          language: 'en',
+          timezone: 'UTC',
+          notifications: {
+            email: true,
+            push: true,
+            marketing: false
+          },
           profilePicture: null,
           createdAt: new Date().toISOString(),
           lastLogin: new Date().toISOString()
@@ -279,39 +371,18 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  // Check for mock user in development
-  const checkMockAuth = useCallback(() => {
-    if (process.env.NODE_ENV === 'development') {
-      const mockUser = localStorage.getItem('mock_user');
-      if (mockUser) {
-        try {
-          const parsedUser = JSON.parse(mockUser);
-          setCurrentUser(parsedUser);
-        } catch (error) {
-          localStorage.removeItem('mock_user');
-        }
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development' && !currentUser) {
-      checkMockAuth();
-    }
-  }, [currentUser, checkMockAuth]);
-
   // Context value
   const value = {
     currentUser,
     isLoading,
     error,
-    login: process.env.NODE_ENV === 'development' ? mockLogin : login,
-    register: process.env.NODE_ENV === 'development' ? mockRegister : register,
+    login,
+    register,
     logout,
     updateProfile,
-    changePassword,
+    updatePassword,
+    forgotPassword,
     resetPassword,
-    refreshToken,
     clearError,
     checkAuthStatus
   };

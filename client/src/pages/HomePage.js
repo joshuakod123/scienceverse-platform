@@ -1,23 +1,39 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
-import { useCourses } from '../context/CourseContext';
 import SpaceCanvas from '../components/Space/SpaceCanvas';
+import '../styles/Dashboard.css';
 
 const HomePage = () => {
-  const [loading, setLoading] = useState(true);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const userMenuRef = useRef(null);
-  const { logout, currentUser } = useContext(AuthContext);
-  const { userCourses, availableCourses, getAPCourses } = useCourses();
   const navigate = useNavigate();
+  const { currentUser, logout } = useContext(AuthContext);
+  const profileMenuRef = useRef(null);
   
-  // Handle clicks outside the user menu
+  const [loading, setLoading] = useState(true);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [userCourses] = useState([]); // Mock empty courses for now
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!currentUser) {
+      navigate('/auth');
+      return;
+    }
+    
+    // Loading simulation
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, [currentUser, navigate]);
+
+  // Handle clicks outside the profile menu
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
       }
     };
     
@@ -26,318 +42,289 @@ const HomePage = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
+  // Profile menu position adjustment
   useEffect(() => {
-    // 로딩 시뮬레이션
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  // Handle logout function
-  const handleLogout = () => {
-    if (window.confirm('정말 로그아웃하시겠습니까?')) {
-      logout();
+    if (showProfileMenu && profileMenuRef.current) {
+      const menu = profileMenuRef.current.querySelector('.profile-menu');
+      if (menu) {
+        const rect = menu.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        
+        if (rect.right > viewportWidth) {
+          const overflow = rect.right - viewportWidth + 20; // 20px margin
+          menu.style.transform = `translateX(-${overflow}px)`;
+        }
+      }
+    }
+  }, [showProfileMenu]);
+
+  // Enhanced logout function with confirmation
+  const handleLogout = async () => {
+    const confirmLogout = window.confirm('Are you sure you want to logout?');
+    if (!confirmLogout) return;
+
+    try {
+      setShowProfileMenu(false);
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
       navigate('/');
     }
   };
 
-  // 진행 중인 코스들 (AP 우선)
-  const inProgressCourses = userCourses
-    .filter(course => course.progress > 0 && course.progress < 100)
-    .sort((a, b) => {
-      // AP 코스를 우선으로 정렬
-      if (a.apCourse && !b.apCourse) return -1;
-      if (!a.apCourse && b.apCourse) return 1;
-      return b.progress - a.progress;
-    })
-    .slice(0, 4);
+  // Profile menu handlers
+  const handleProfileClick = () => {
+    setShowProfileMenu(prevState => !prevState);
+  };
 
-  // 추천 AP 코스들
-  const recommendedAPCourses = getAPCourses()
-    .filter(course => !userCourses.some(uc => uc.id === course.id))
-    .slice(0, 3);
+  const handleProfilePageClick = () => {
+    setShowProfileMenu(false);
+    navigate('/profile');
+  };
 
-  // 전체 학습 진행률 계산
-  const overallProgress = userCourses.length > 0 
-    ? userCourses.reduce((sum, course) => sum + course.progress, 0) / userCourses.length
-    : 0;
+  const handleDiscoverClick = () => {
+    navigate('/discover');
+  };
 
-  const renderCourseCard = (course, isRecommended = false) => (
-    <motion.div
-      key={course.id}
-      className="course-card"
-      whileHover={{ scale: 1.02, y: -5 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => navigate(`/course/${course.id}`)}
-      style={{
-        background: isRecommended 
-          ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)'
-          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-        border: course.apCourse 
-          ? '2px solid rgba(255, 193, 7, 0.5)' 
-          : '2px solid rgba(255, 255, 255, 0.2)',
-        borderRadius: '16px',
-        padding: '20px',
-        cursor: 'pointer',
-        backdropFilter: 'blur(10px)',
-        color: 'white',
-        position: 'relative',
-        overflow: 'hidden'
-      }}
-    >
-      {/* AP 배지 */}
-      {course.apCourse && (
-        <div style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
-          background: 'linear-gradient(135deg, #FFD700, #FFA500)',
-          color: '#1a202c',
-          padding: '4px 8px',
-          borderRadius: '12px',
-          fontSize: '10px',
-          fontWeight: 'bold'
-        }}>
-          AP
-        </div>
-      )}
+  // User display name
+  const userDisplayName = currentUser?.username || currentUser?.fullName || 'User';
 
-      <div style={{ marginBottom: '12px' }}>
-        <h3 style={{ 
-          fontSize: '18px', 
-          fontWeight: 'bold', 
-          marginBottom: '4px',
-          color: 'white'
-        }}>
-          {course.title}
-        </h3>
-        <p style={{ 
-          fontSize: '14px', 
-          opacity: 0.8,
-          marginBottom: '8px'
-        }}>
-          {course.subtitle}
-        </p>
-        <p style={{ 
-          fontSize: '12px', 
-          opacity: 0.7
-        }}>
-          {course.author} • {course.totalLessons}개 레슨
-        </p>
-      </div>
-
-      {!isRecommended && course.progress !== undefined && (
-        <div style={{ marginBottom: '12px' }}>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '6px'
-          }}>
-            <span style={{ fontSize: '12px', opacity: 0.8 }}>진행률</span>
-            <span style={{ fontSize: '12px', fontWeight: 'bold' }}>
-              {Math.round(course.progress)}%
-            </span>
-          </div>
-          <div style={{
-            width: '100%',
-            height: '6px',
-            background: 'rgba(255, 255, 255, 0.2)',
-            borderRadius: '3px',
-            overflow: 'hidden'
-          }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${course.progress}%` }}
-              transition={{ duration: 1, delay: 0.2 }}
-              style={{
-                height: '100%',
-                background: course.apCourse 
-                  ? 'linear-gradient(90deg, #FFD700, #FFA500)'
-                  : 'linear-gradient(90deg, #667eea, #764ba2)',
-                borderRadius: '3px'
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        fontSize: '12px'
-      }}>
-        <div>
-          <span>⭐ {course.rating}</span>
-          <span style={{ marginLeft: '12px', opacity: 0.8 }}>
-            {course.students?.toLocaleString()}명 수강
-          </span>
-        </div>
-        {isRecommended && (
-          <div style={{
-            background: 'rgba(102, 126, 234, 0.8)',
-            color: 'white',
-            padding: '4px 8px',
-            borderRadius: '12px',
-            fontSize: '10px',
-            fontWeight: 'bold'
-          }}>
-            추천
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
+  // Mock recommended courses
+  const recommendedCourses = [
+    {
+      id: 'ap-physics-1',
+      title: 'AP Physics 1',
+      subtitle: 'Algebra-based Physics Fundamentals',
+      instructor: 'Dr. Richard Feynman',
+      lessons: 25,
+      students: 15420,
+      rating: 4.9,
+      difficulty: 'Intermediate',
+      color: 'linear-gradient(135deg, #722F37 0%, #E85A4F 100%)',
+      icon: '⚡'
+    },
+    {
+      id: 'ap-physics-2',
+      title: 'AP Physics 2',
+      subtitle: 'Advanced Algebra-based Physics',
+      instructor: 'Dr. Richard Feynman',
+      lessons: 28,
+      students: 12100,
+      rating: 4.8,
+      difficulty: 'Advanced',
+      color: 'linear-gradient(135deg, #1E0538 0%, #722F37 100%)',
+      icon: '🔬'
+    },
+    {
+      id: 'ap-physics-c-mechanics',
+      title: 'AP Physics C: Mechanics',
+      subtitle: 'Calculus-based Mechanics',
+      instructor: 'Dr. Isaac Newton',
+      lessons: 20,
+      students: 8920,
+      rating: 4.9,
+      difficulty: 'Advanced',
+      color: 'linear-gradient(135deg, #0B1026 0%, #1E0538 100%)',
+      icon: '🧮'
+    }
+  ];
 
   if (loading) {
     return (
       <div style={{
-        position: 'relative',
-        minHeight: '100vh',
+        position: 'fixed',
+        inset: 0,
+        background: 'linear-gradient(135deg, #0B1026 0%, #1E0538 50%, #722F37 100%)',
         display: 'flex',
-        justifyContent: 'center',
         alignItems: 'center',
-        color: 'white'
+        justifyContent: 'center',
+        zIndex: 9999
       }}>
         <SpaceCanvas />
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          style={{ fontSize: '48px' }}
-        >
-          🚀
-        </motion.div>
-        <h2 style={{ marginLeft: '16px' }}>학습 데이터를 불러오는 중...</h2>
+        <div style={{
+          position: 'absolute',
+          color: '#EFDFBB',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          Loading BrainByte...
+        </div>
       </div>
     );
   }
 
   return (
     <div style={{
-      position: 'relative',
       minHeight: '100vh',
-      color: 'white',
-      padding: '20px'
+      background: 'linear-gradient(135deg, #0B1026 0%, #1E0538 50%, #722F37 100%)',
+      color: '#EFDFBB',
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif"
     }}>
-      <SpaceCanvas />
-      
-      {/* 헤더 */}
+      {/* Header */}
       <motion.header
-        initial={{ opacity: 0, y: -50 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         style={{
-          position: 'relative',
-          zIndex: 10,
+          position: 'sticky',
+          top: 0,
+          zIndex: 1000,
+          padding: '20px 40px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '40px',
-          maxWidth: '1200px',
-          margin: '0 auto 40px'
+          backdropFilter: 'blur(15px)',
+          background: 'rgba(11, 16, 38, 0.9)',
+          borderBottom: '1px solid rgba(239, 223, 187, 0.2)',
+          boxShadow: '0 2px 20px rgba(0, 0, 0, 0.1)'
         }}
       >
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <h1 style={{ 
-            fontSize: '36px', 
-            fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            fontSize: '28px', 
+            fontWeight: 'bold', 
+            background: 'linear-gradient(135deg, #EFDFBB, #E85A4F)',
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            WebkitTextFillColor: 'transparent',
+            margin: 0
           }}>
-            AP Physics & Calculus
+            BrainByte
           </h1>
-          <p style={{ fontSize: '16px', opacity: 0.9, marginTop: '8px' }}>
-            안녕하세요, {currentUser?.username || '학습자'}님! 오늘도 열심히 공부해볼까요? 🚀
-          </p>
+          <span style={{ fontSize: '18px', opacity: 0.7 }}>
+            AP Physics & Calculus
+          </span>
         </div>
 
-        {/* 사용자 메뉴 */}
-        <div className="user-dropdown" ref={userMenuRef} style={{ position: 'relative' }}>
-          <motion.div 
-            className="user-avatar" 
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowUserMenu(!showUserMenu)}
+        {/* Navigation */}
+        <nav style={{ display: 'flex', gap: '20px' }}>
+          <button 
+            onClick={handleDiscoverClick}
             style={{
-              width: '50px',
-              height: '50px',
+              background: 'rgba(239, 223, 187, 0.1)',
+              border: '1px solid rgba(239, 223, 187, 0.3)',
+              borderRadius: '12px',
+              padding: '10px 16px',
+              color: '#EFDFBB',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            Discover More →
+          </button>
+        </nav>
+
+        {/* Profile Section */}
+        <div 
+          ref={profileMenuRef}
+          style={{ position: 'relative' }}
+        >
+          <button
+            onClick={handleProfileClick}
+            style={{
+              background: 'rgba(239, 223, 187, 0.1)',
+              border: '1px solid rgba(239, 223, 187, 0.3)',
+              borderRadius: '25px',
+              padding: '8px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <div style={{
+              width: '35px',
+              height: '35px',
+              background: 'linear-gradient(135deg, #722F37, #E85A4F)',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              color: 'white'
-            }}
-          >
-            {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
-          </motion.div>
-          
-          {showUserMenu && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="user-menu"
-              style={{
-                position: 'absolute',
-                top: '60px',
-                right: '0',
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: '12px',
-                padding: '16px',
-                minWidth: '200px',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
-              }}
-            >
-              <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
-                <div style={{ fontWeight: 'bold' }}>{currentUser?.username}</div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>{currentUser?.email}</div>
-              </div>
-              
-              <button
-                onClick={() => navigate('/profile')}
+              color: '#EFDFBB',
+              fontWeight: '600',
+              fontSize: '16px',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
+            }}>
+              {userDisplayName.charAt(0).toUpperCase()}
+            </div>
+            <span style={{
+              color: '#EFDFBB',
+              fontWeight: '500',
+              fontSize: '14px'
+            }}>
+              {userDisplayName}
+            </span>
+          </button>
+
+          <AnimatePresence>
+            {showProfileMenu && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
                 style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'left',
-                  background: 'none',
-                  border: 'none',
-                  color: 'white',
-                  padding: '8px 0',
-                  cursor: 'pointer',
-                  fontSize: '14px'
+                  position: 'absolute',
+                  top: 'calc(100% + 12px)',
+                  right: '10px',
+                  background: 'rgba(11, 16, 38, 0.98)',
+                  border: '1px solid rgba(239, 223, 187, 0.3)',
+                  borderRadius: '15px',
+                  padding: '12px 8px',
+                  width: '200px',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6), 0 5px 15px rgba(0, 0, 0, 0.4)',
+                  zIndex: 2000
                 }}
+                className="profile-menu"
               >
-                👤 프로필 설정
-              </button>
-              
-              <button
-                onClick={handleLogout}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'left',
-                  background: 'none',
-                  border: 'none',
-                  color: 'white',
-                  padding: '8px 0',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                🚪 로그아웃
-              </button>
-            </motion.div>
-          )}
+                <button
+                  onClick={handleProfilePageClick}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    color: '#EFDFBB',
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    borderRadius: '8px',
+                    transition: 'background 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = 'rgba(239, 223, 187, 0.1)'}
+                  onMouseLeave={(e) => e.target.style.background = 'none'}
+                >
+                  👤 Profile Settings
+                </button>
+                
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    color: '#E85A4F',
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    borderRadius: '8px',
+                    transition: 'background 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = 'rgba(232, 90, 79, 0.1)'}
+                  onMouseLeave={(e) => e.target.style.background = 'none'}
+                >
+                  🚪 Logout
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.header>
 
@@ -345,14 +332,15 @@ const HomePage = () => {
         maxWidth: '1200px',
         margin: '0 auto',
         position: 'relative',
-        zIndex: 10
+        zIndex: 10,
+        padding: '0 20px'
       }}>
-        {/* 학습 진행 상황 요약 */}
+        {/* Learning Progress Summary */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          style={{ marginBottom: '40px' }}
+          style={{ marginBottom: '40px', marginTop: '40px' }}
         >
           <div style={{
             background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)',
@@ -367,7 +355,7 @@ const HomePage = () => {
               marginBottom: '20px',
               color: 'white'
             }}>
-              📊 학습 현황
+              📊 Learning Progress
             </h2>
             
             <div style={{ 
@@ -379,226 +367,208 @@ const HomePage = () => {
                 <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FFD700' }}>
                   {userCourses.length}
                 </div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>등록된 코스</div>
+                <div style={{ fontSize: '14px', opacity: 0.8 }}>Enrolled Courses</div>
               </div>
               
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#67F3AB' }}>
-                  {Math.round(overallProgress)}%
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#4CAF50' }}>
+                  0%
                 </div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>전체 진행률</div>
+                <div style={{ fontSize: '14px', opacity: 0.8 }}>Overall Progress</div>
               </div>
               
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FB7185' }}>
-                  {userCourses.filter(c => c.apCourse).length}
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FF6B6B' }}>
+                  0
                 </div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>AP 코스</div>
+                <div style={{ fontSize: '14px', opacity: 0.8 }}>AP Courses</div>
               </div>
               
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#60A5FA' }}>
-                  {userCourses.filter(c => c.progress === 100).length}
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#4ECDC4' }}>
+                  0
                 </div>
-                <div style={{ fontSize: '14px', opacity: 0.8 }}>완료된 코스</div>
+                <div style={{ fontSize: '14px', opacity: 0.8 }}>Online Courses</div>
               </div>
             </div>
           </div>
         </motion.section>
 
-        {/* 진행 중인 코스들 */}
-        {inProgressCourses.length > 0 && (
-          <motion.section
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            style={{ marginBottom: '40px' }}
-          >
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '24px'
-            }}>
-              <h2 style={{ 
-                fontSize: '24px', 
-                fontWeight: 'bold',
-                color: 'white'
-              }}>
-                📚 진행 중인 코스
-              </h2>
-              <Link 
-                to="/courses"
-                style={{
-                  color: '#667eea',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                전체 보기 →
-              </Link>
-            </div>
-            
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '20px'
-            }}>
-              {inProgressCourses.map(course => renderCourseCard(course))}
-            </div>
-          </motion.section>
-        )}
-
-        {/* 추천 AP 코스들 */}
-        {recommendedAPCourses.length > 0 && (
-          <motion.section
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            style={{ marginBottom: '40px' }}
-          >
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '24px'
-            }}>
-              <h2 style={{ 
-                fontSize: '24px', 
-                fontWeight: 'bold',
-                color: 'white'
-              }}>
-                🌟 추천 AP 코스
-              </h2>
-              <Link 
-                to="/discover"
-                style={{
-                  color: '#667eea',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                더 탐색하기 →
-              </Link>
-            </div>
-            
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '20px'
-            }}>
-              {recommendedAPCourses.map(course => renderCourseCard(course, true))}
-            </div>
-          </motion.section>
-        )}
-
-        {/* 빈 상태 - 코스가 없을 때 */}
-        {userCourses.length === 0 && (
-          <motion.section
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            style={{
-              textAlign: 'center',
-              padding: '60px 20px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '20px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}
-          >
-            <div style={{ fontSize: '64px', marginBottom: '24px' }}>🚀</div>
-            <h3 style={{ 
-              fontSize: '28px', 
-              fontWeight: 'bold', 
-              marginBottom: '16px',
-              color: 'white'
-            }}>
-              AP 학습 여정을 시작해보세요!
-            </h3>
-            <p style={{ 
-              fontSize: '16px', 
-              opacity: 0.8, 
-              marginBottom: '32px',
-              maxWidth: '500px',
-              margin: '0 auto 32px'
-            }}>
-              Physics와 Calculus AP 코스들이 여러분을 기다리고 있어요. 
-              3D 애니메이션과 시뮬레이션으로 복잡한 개념도 쉽게 이해할 수 있답니다!
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/discover')}
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none',
-                padding: '16px 32px',
-                borderRadius: '25px',
-                color: 'white',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                cursor: 'pointer'
-              }}
-            >
-              코스 둘러보기
-            </motion.button>
-          </motion.section>
-        )}
-
-        {/* 하단 네비게이션 */}
-        <motion.nav
+        {/* Welcome Message */}
+        <motion.section
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '16px',
-            marginTop: '40px',
-            paddingTop: '40px'
+          transition={{ duration: 0.8, delay: 0.4 }}
+          style={{ 
+            textAlign: 'center', 
+            marginBottom: '60px',
+            padding: '60px 40px'
           }}
         >
-          <Link to="/discover">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+          <div style={{ marginBottom: '60px' }}>
+            <div style={{ fontSize: '80px', marginBottom: '20px' }}>🚀</div>
+            <h1 style={{ 
+              fontSize: '48px', 
+              fontWeight: 'bold', 
+              marginBottom: '20px',
+              background: 'linear-gradient(135deg, #EFDFBB, #E85A4F)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              Start Your AP Learning Journey!
+            </h1>
+            <p style={{ 
+              fontSize: '20px', 
+              opacity: 0.8, 
+              maxWidth: '600px', 
+              margin: '0 auto',
+              lineHeight: '1.6'
+            }}>
+              Ready to tackle Physics and Calculus AP courses? Our interactive 3D animations and AI tutoring will guide you every step of the way!
+            </p>
+          </div>
+        </motion.section>
+
+        {/* Recommended AP Courses */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          style={{ marginBottom: '80px' }}
+        >
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            marginBottom: '30px'
+          }}>
+            <h2 style={{ 
+              fontSize: '28px', 
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              ⭐ Recommended AP Courses
+            </h2>
+            <button
+              onClick={handleDiscoverClick}
               style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                padding: '12px 24px',
-                borderRadius: '20px',
-                color: 'white',
-                fontSize: '14px',
+                background: 'none',
+                border: 'none',
+                color: '#E85A4F',
+                fontSize: '16px',
                 cursor: 'pointer',
-                backdropFilter: 'blur(10px)'
+                textDecoration: 'underline'
               }}
             >
-              🔍 코스 탐색
-            </motion.button>
-          </Link>
-          
-          <Link to="/progress">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                padding: '12px 24px',
-                borderRadius: '20px',
-                color: 'white',
-                fontSize: '14px',
-                cursor: 'pointer',
-                backdropFilter: 'blur(10px)'
-              }}
-            >
-              📈 학습 진도
-            </motion.button>
-          </Link>
-        </motion.nav>
+              View All →
+            </button>
+          </div>
+
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+            gap: '24px'
+          }}>
+            {recommendedCourses.map((course, index) => (
+              <motion.div
+                key={course.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 * index }}
+                whileHover={{ 
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
+                }}
+                style={{
+                  background: course.color,
+                  borderRadius: '20px',
+                  padding: '30px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <div style={{ position: 'relative', zIndex: 2 }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'flex-start',
+                    marginBottom: '16px'
+                  }}>
+                    <span style={{ fontSize: '32px' }}>{course.icon}</span>
+                    <span style={{ 
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      borderRadius: '20px',
+                      padding: '4px 12px',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    }}>
+                      AP
+                    </span>
+                  </div>
+                  
+                  <h3 style={{ 
+                    fontSize: '20px', 
+                    fontWeight: 'bold', 
+                    marginBottom: '8px',
+                    color: 'white'
+                  }}>
+                    {course.title}
+                  </h3>
+                  
+                  <p style={{ 
+                    fontSize: '14px', 
+                    opacity: 0.9, 
+                    marginBottom: '16px',
+                    color: 'white'
+                  }}>
+                    {course.subtitle}
+                  </p>
+                  
+                  <div style={{ 
+                    fontSize: '13px', 
+                    opacity: 0.8,
+                    marginBottom: '20px',
+                    color: 'white'
+                  }}>
+                    {course.instructor} • {course.lessons} lessons
+                  </div>
+                  
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      gap: '8px',
+                      color: 'white'
+                    }}>
+                      <span>⭐ {course.rating}</span>
+                      <span style={{ opacity: 0.7 }}>({course.students.toLocaleString()} students)</span>
+                    </div>
+                    
+                    <button style={{
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      border: 'none',
+                      borderRadius: '20px',
+                      padding: '8px 16px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    }}>
+                      Enroll
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
       </div>
     </div>
   );

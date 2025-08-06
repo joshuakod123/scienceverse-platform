@@ -9,9 +9,9 @@ import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import DiscoverPage from './pages/DiscoverPage';
+import ProfilePage from './pages/ProfilePage';
 // import CoursePage from './pages/CoursePage';
 // import LessonPage from './pages/LessonPage';
-// import ProfilePage from './pages/ProfilePage';
 // import ProgressPage from './pages/ProgressPage';
 
 // Styles
@@ -41,6 +41,12 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+              
               {/* 임시로 주석 처리 - 해당 컴포넌트들이 없는 경우 */}
               {/*
               <Route path="/course/:id" element={
@@ -55,12 +61,6 @@ function App() {
                 </ProtectedRoute>
               } />
               
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
-              
               <Route path="/progress" element={
                 <ProtectedRoute>
                   <ProgressPage />
@@ -68,18 +68,7 @@ function App() {
               } />
               */}
               
-              <Route path="/courses" element={
-                <ProtectedRoute>
-                  <DiscoverPage />
-                </ProtectedRoute>
-              } />
-              
-              {/* Redirects for common paths */}
-              <Route path="/home" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/login" element={<Navigate to="/auth" replace />} />
-              <Route path="/register" element={<Navigate to="/auth" replace />} />
-              
-              {/* 404 - Redirect to dashboard if authenticated, otherwise to landing */}
+              {/* Catch all route - redirect to landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
