@@ -157,55 +157,6 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };headers.common['Authorization'] = `Bearer ${token}`;
-
-      // Set user data
-      setCurrentUser(user);
-      
-      return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          '로그인 중 오류가 발생했습니다.';
-      setError(errorMessage);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (username, email, password) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
-        username,
-        email,
-        password
-      });
-
-      const { token, user } = response.data;
-
-      // Store token
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      // Set user data
-      setCurrentUser(user);
-      
-      return true;
-    } catch (error) {
-      console.error('Registration error:', error);
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          '회원가입 중 오류가 발생했습니다.';
-      setError(errorMessage);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const updateProfile = async (profileData) => {

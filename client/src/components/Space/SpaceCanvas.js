@@ -1,6 +1,5 @@
-import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-// Three.js 관련 컴포넌트가 없다면 CSS로 대체하겠습니다
 const SpaceCanvas = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -96,51 +95,37 @@ const SpaceCanvas = () => {
               borderRadius: '50%',
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animation: `particle-float-${i % 3} ${Math.random() * 10 + 8}s infinite linear`,
-              boxShadow: '0 0 6px rgba(239, 223, 187, 0.8)'
+              animation: `float ${Math.random() * 10 + 10}s ease-in-out infinite alternate`,
+              animationDelay: `${Math.random() * 5}s`
             }}
           />
         ))}
       </div>
-
+      
       {/* CSS Animations */}
       <style jsx>{`
         @keyframes twinkle {
-          0% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.1); }
-          100% { opacity: 0.5; transform: scale(1); }
+          0% { opacity: 0.8; transform: scale(1) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1.1) rotate(180deg); }
+          100% { opacity: 0.8; transform: scale(1) rotate(360deg); }
         }
         
         @keyframes nebula-drift {
-          0% { transform: translate(0, 0) rotate(0deg); }
-          33% { transform: translate(-20px, 10px) rotate(1deg); }
-          66% { transform: translate(15px, -15px) rotate(-1deg); }
-          100% { transform: translate(0, 0) rotate(0deg); }
+          0% { transform: translate(0px, 0px) rotate(0deg); }
+          25% { transform: translate(20px, -15px) rotate(90deg); }
+          50% { transform: translate(-10px, 10px) rotate(180deg); }
+          75% { transform: translate(-20px, -5px) rotate(270deg); }
+          100% { transform: translate(0px, 0px) rotate(360deg); }
         }
         
-        @keyframes particle-float-0 {
-          0% { transform: translateY(100vh) translateX(0); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(-100px) translateX(100px); opacity: 0; }
-        }
-        
-        @keyframes particle-float-1 {
-          0% { transform: translateY(100vh) translateX(0); opacity: 0; }
-          15% { opacity: 1; }
-          85% { opacity: 1; }
-          100% { transform: translateY(-100px) translateX(-50px); opacity: 0; }
-        }
-        
-        @keyframes particle-float-2 {
-          0% { transform: translateY(100vh) translateX(0); opacity: 0; }
-          20% { opacity: 1; }
-          80% { opacity: 1; }
-          100% { transform: translateY(-100px) translateX(30px); opacity: 0; }
+        @keyframes float {
+          0% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(-20px) translateX(10px); }
+          100% { transform: translateY(0px) translateX(0px); }
         }
       `}</style>
     </div>
   );
 };
-  
+
 export default SpaceCanvas;
