@@ -1,30 +1,33 @@
+// server/routes/lessons.js
 const express = require('express');
+const router = express.Router();
 const {
   getLessons,
   getLesson,
   createLesson,
   updateLesson,
   deleteLesson,
-  getLessonsByCategory,
-  updateLessonProgress
+  getLessonsByCourseAndUnit,
+  getLessonsByCourse,
+  getFullLesson,
+  createBulkLessons
 } = require('../controllers/lessons');
 
-const router = express.Router();
-
 const { protect, authorize } = require('../middleware/auth');
-const { trackProgress, checkPrerequisites } = require('../middleware/progress');
 
 // Public routes
-router.route('/category/:category').get(getLessonsByCategory);
+router.get('/', getLessons);
+router.get('/:id', getLesson);
 
-// Routes that use authentication
-router.route('/').get(getLessons).post(protect, authorize('admin'), createLesson);
+// Protected routes - 로그인 필요
+router.get('/course/:courseId', protect, getLessonsByCourse);
+router.get('/course/:courseId/unit/:unitNumber', protect, getLessonsByCourseAndUnit);
+router.get('/:id/full', protect, getFullLesson);
 
-router.route('/:id')
-  .get(protect, checkPrerequisites, trackProgress, getLesson)
-  .put(protect, authorize('admin'), updateLesson)
-  .delete(protect, authorize('admin'), deleteLesson);
-
-router.route('/:id/progress').put(protect, updateLessonProgress);
+// Admin only routes
+router.post('/', protect, authorize('admin'), createLesson);
+router.post('/bulk', protect, authorize('admin'), createBulkLessons);
+router.put('/:id', protect, authorize('admin'), updateLesson);
+router.delete('/:id', protect, authorize('admin'), deleteLesson);
 
 module.exports = router;
