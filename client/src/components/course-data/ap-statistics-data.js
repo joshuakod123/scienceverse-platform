@@ -54,7 +54,6 @@ export const unitData = {
         { id: "3.7", title: "Inference and Experiments", description: "Drawing conclusions from experiments.", skills: ["4.B"] }
     ]
   },
-  // ... (Units 4 through 9 would be added here in the same format)
   unit4: {
     title: "Unit 4: Probability, Random Variables, and Probability Distributions",
     description: "Build a foundation in probability theory and random variables.",

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CourseLayout from '../../../components/CourseLayout';
-import { unitData } from '../../../components/course-data/ap-statistics-data'; // 데이터 분리 (아래에 코드 제공)
+import { unitData } from '../../../components/course-data/ap-statistics-data';
 
 const APStatisticsUnitPage = () => {
   const { unitId } = useParams();
@@ -13,7 +13,6 @@ const APStatisticsUnitPage = () => {
   const currentUnit = unitData[`unit${unitId}`];
 
   useEffect(() => {
-    // 페이지가 로드될 때 localStorage에서 완료된 토픽 불러오기
     const savedProgress = localStorage.getItem(`ap-stats-unit-${unitId}-progress`);
     if (savedProgress) {
       setCompletedTopics(new Set(JSON.parse(savedProgress)));
@@ -21,7 +20,6 @@ const APStatisticsUnitPage = () => {
   }, [unitId]);
 
   useEffect(() => {
-    // 완료된 토픽이 변경될 때마다 localStorage에 저장
     localStorage.setItem(`ap-stats-unit-${unitId}-progress`, JSON.stringify([...completedTopics]));
   }, [completedTopics, unitId]);
   
@@ -157,7 +155,7 @@ const APStatisticsUnitPage = () => {
                 
                 <div className="ml-6">
                   <button
-                    onClick={() => navigate(`/lesson/${topic.id}`)}
+                    onClick={() => alert(`Navigating to lesson for topic ${topic.id}`)} // Replace with actual navigation
                     className="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-colors font-semibold"
                   >
                     Study

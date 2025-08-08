@@ -1,3 +1,5 @@
+// File: client/src/App.js
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -11,15 +13,20 @@ import HomePage from './pages/HomePage';
 import DiscoverPage from './pages/DiscoverPage';
 import ProfilePage from './pages/ProfilePage';
 import LessonPage from './pages/LessonPage';
-import APStatisticsIndexPage from './pages/courses/ap-statistics/index.js';
-import APStatisticsUnitPage from './pages/courses/ap-statistics/[unit].js'; // 새로 만든 유닛 페이지 import 
+
+// AP Statistics Course Pages
 import APStatistics from './pages/courses/APStatistics';
 import APStatisticsUnit from './pages/courses/APStatisticsUnit';
 import APStatisticsTopic from './pages/courses/APStatisticsTopic';
+
+// Alternative AP Statistics Pages (if you want to use these instead)
+// import APStatisticsIndexPage from './pages/courses/ap-statistics/index.js';
+// import APStatisticsUnitPage from './pages/courses/ap-statistics/[unit].js';
+
 // Styles
 import './styles/App.css';
 
-// 임시 CoursePage 컴포넌트
+// Temporary CoursePage component for other courses
 const CoursePage = () => {
     const { id } = useParams();
     return (
@@ -46,19 +53,44 @@ function App() {
               <Route path="/discover" element={<ProtectedRoute><DiscoverPage /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               
-              {/* Course & Lesson Routes */}
-              <Route path="/courses/ap-statistics" element={<ProtectedRoute><APStatisticsIndexPage /></ProtectedRoute>} />
-              {/* ▼▼▼▼▼ 새로운 유닛 페이지를 위한 경로 추가 ▼▼▼▼▼ */}
-              <Route path="/courses/ap-statistics/unit/:unitId" element={<ProtectedRoute><APStatisticsUnitPage /></ProtectedRoute>} />
-              {/* ▲▲▲▲▲ 새로운 유닛 페이지를 위한 경로 추가 ▲▲▲▲▲ */}
-
-              <Route path="/course/:id" element={<ProtectedRoute><CoursePage /></ProtectedRoute>} />
-              <Route path="/lesson/:id" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
+              {/* AP Statistics Course Routes */}
+              <Route 
+                path="/courses/ap-statistics" 
+                element={<ProtectedRoute><APStatistics /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/courses/ap-statistics/:unitNumber" 
+                element={<ProtectedRoute><APStatisticsUnit /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/courses/ap-statistics/:unitNumber/:topicId" 
+                element={<ProtectedRoute><APStatisticsTopic /></ProtectedRoute>} 
+              />
               
+              {/* Alternative routing structure (comment out the above and uncomment these if you prefer) */}
+              {/* 
+              <Route 
+                path="/courses/ap-statistics" 
+                element={<ProtectedRoute><APStatisticsIndexPage /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/courses/ap-statistics/unit/:unitId" 
+                element={<ProtectedRoute><APStatisticsUnitPage /></ProtectedRoute>} 
+              />
+              */}
+              
+              {/* Generic Course & Lesson Routes */}
+              <Route 
+                path="/course/:id" 
+                element={<ProtectedRoute><CoursePage /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/lesson/:id" 
+                element={<ProtectedRoute><LessonPage /></ProtectedRoute>} 
+              />
+              
+              {/* Catch all - redirect to home */}
               <Route path="*" element={<Navigate to="/" replace />} />
-              <Route path="/courses/ap-statistics" element={<APStatistics />} />
-              <Route path="/courses/ap-statistics/:unitNumber" element={<APStatisticsUnit />} />
-              <Route path="/courses/ap-statistics/:unitNumber/:topicId" element={<APStatisticsTopic />} />
             </Routes>
           </div>
         </Router>

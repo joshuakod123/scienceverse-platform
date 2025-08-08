@@ -3,6 +3,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import CourseLayout from '../../../components/CourseLayout';
+import { unitData } from '../../../components/course-data/ap-statistics-data';
 
 const APStatisticsIndexPage = () => {
   const navigate = useNavigate();
@@ -12,17 +13,11 @@ const APStatisticsIndexPage = () => {
     description: 'Master statistical thinking and data analysis through hands-on exploration of real-world data.',
   };
   
-  const units = [
-    { id: 1, title: 'Exploring One-Variable Data', topics: 10 },
-    { id: 2, title: 'Exploring Two-Variable Data', topics: 9 },
-    { id: 3, title: 'Collecting Data', topics: 7 },
-    { id: 4, title: 'Probability, Random Variables, and Probability Distributions', topics: 12 },
-    { id: 5, title: 'Sampling Distributions', topics: 8 },
-    { id: 6, title: 'Inference for Categorical Data: Proportions', topics: 10 },
-    { id: 7, title: 'Inference for Quantitative Data: Means', topics: 10 },
-    { id: 8, title: 'Inference for Categorical Data: Chi-Square', topics: 6 },
-    { id: 9, title: 'Inference for Quantitative Data: Slopes', topics: 6 },
-  ];
+  // unitData에서 유닛 목록을 동적으로 생성
+  const units = Object.values(unitData).map((unit, index) => ({
+    id: index + 1,
+    ...unit
+  }));
 
   const handleUnitClick = (unitId) => {
     navigate(`/courses/ap-statistics/unit/${unitId}`);
@@ -47,16 +42,22 @@ const APStatisticsIndexPage = () => {
           {units.map((unit) => (
             <div
               key={unit.id}
-              className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 flex flex-col"
-              onClick={() => handleUnitClick(unit.id)}
+              className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col"
             >
-              <div className="p-6 flex-grow">
-                <p className="text-sm font-semibold text-blue-600 mb-2">UNIT {unit.id}</p>
+              <div className="p-6 flex-grow flex flex-col">
+                <div className="flex justify-between items-start mb-2">
+                  <p className="text-sm font-semibold text-blue-600">UNIT {unit.id}</p>
+                  <p className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{unit.examWeight} of AP Exam</p>
+                </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{unit.title}</h3>
-                <p className="text-gray-500 text-sm">{unit.topics} Topics</p>
+                <p className="text-gray-600 text-sm mb-4 flex-grow">{unit.description}</p>
+                <p className="text-gray-500 text-sm">{unit.topics.length} Topics</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-b-xl mt-auto">
-                <button className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium">
+                <button 
+                  onClick={() => handleUnitClick(unit.id)}
+                  className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                >
                   Go to Unit
                 </button>
               </div>
