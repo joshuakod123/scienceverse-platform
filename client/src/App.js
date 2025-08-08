@@ -12,8 +12,10 @@ import DiscoverPage from './pages/DiscoverPage';
 import ProfilePage from './pages/ProfilePage';
 import LessonPage from './pages/LessonPage';
 import APStatisticsIndexPage from './pages/courses/ap-statistics/index.js';
-import APStatisticsUnitPage from './pages/courses/ap-statistics/[unit].js'; // 새로 만든 유닛 페이지 import
-
+import APStatisticsUnitPage from './pages/courses/ap-statistics/[unit].js'; // 새로 만든 유닛 페이지 import 
+import APStatistics from './pages/courses/APStatistics';
+import APStatisticsUnit from './pages/courses/APStatisticsUnit';
+import APStatisticsTopic from './pages/courses/APStatisticsTopic';
 // Styles
 import './styles/App.css';
 
@@ -54,6 +56,9 @@ function App() {
               <Route path="/lesson/:id" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
               
               <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/courses/ap-statistics" element={<APStatistics />} />
+              <Route path="/courses/ap-statistics/:unitNumber" element={<APStatisticsUnit />} />
+              <Route path="/courses/ap-statistics/:unitNumber/:topicId" element={<APStatisticsTopic />} />
             </Routes>
           </div>
         </Router>
