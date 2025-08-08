@@ -5,31 +5,54 @@ import SpaceCanvas from '../components/Space/SpaceCanvas';
 
 const DiscoverPage = () => {
   const navigate = useNavigate();
-  const [selectedCategory, setSelectedCategory] = useState('전체');
-  const [selectedLevel, setSelectedLevel] = useState('전체');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedLevel, setSelectedLevel] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // AP 과목 중심의 고등학생 대상 코스 데이터
+  // Course data for high school students focusing on AP subjects
   const allCourses = useMemo(() => [
-    // AP Physics
+    // AP Statistics (Newly Added)
+    {
+      id: 'ap-statistics',
+      title: 'AP Statistics',
+      subtitle: 'Master statistical thinking and data analysis',
+      category: 'Mathematics',
+      level: 'Advanced',
+      duration: '32 Weeks',
+      price: 'Free',
+      originalPrice: null,
+      rating: 4.9,
+      studentsEnrolled: 16200,
+      instructor: 'Dr. Evelyn Reed',
+      description: 'Explore data analysis, probability, statistical inference, and experimental design.',
+      thumbnail: 'linear-gradient(135deg, #0093E9 0%, #80D0C7 100%)',
+      icon: '📊',
+      features: ['Interactive Data Tools', 'Real-world Scenarios', 'AP Exam Prep'],
+      difficulty: 80,
+      popular: true,
+      new: true,
+      bestseller: true,
+      apCourse: true
+    },
+    // Other courses... (rest of the courses array remains the same as previous answer)
     {
       id: 'ap-physics-1',
       title: 'AP Physics 1',
       subtitle: 'Algebra-based Physics',
-      category: '물리학',
+      category: 'Physics',
       level: 'Beginner',
-      duration: '32주',
+      duration: '32 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.9,
       studentsEnrolled: 15420,
-      instructor: 'Dr. 김물리',
-      description: '대수 기반의 물리학. 운동학, 역학, 파동, 전기 기초 등을 다룹니다.',
+      instructor: 'Dr. Ken Physics',
+      description: 'Covers algebra-based physics including kinematics, dynamics, waves, and basic electricity.',
       thumbnail: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       icon: '⚛️',
-      features: ['인터랙티브 시뮬레이션', '실험 애니메이션', 'AP 시험 준비'],
+      features: ['Interactive Simulations', 'Animation Experiments', 'AP Exam Prep'],
       difficulty: 70,
       popular: true,
       new: false,
@@ -40,18 +63,18 @@ const DiscoverPage = () => {
       id: 'ap-physics-2',
       title: 'AP Physics 2',
       subtitle: 'Advanced Algebra-based Physics',
-      category: '물리학',
+      category: 'Physics',
       level: 'Intermediate',
-      duration: '32주',
+      duration: '32 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.8,
       studentsEnrolled: 12100,
-      instructor: 'Dr. 김물리',
-      description: '유체역학, 열역학, 전자기학, 광학, 원자물리학을 다룹니다.',
+      instructor: 'Dr. Ken Physics',
+      description: 'Covers fluid dynamics, thermodynamics, electromagnetism, optics, and atomic physics.',
       thumbnail: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
       icon: '🔬',
-      features: ['고급 실험', 'AP 시험 대비', '대학 물리 준비'],
+      features: ['Advanced Experiments', 'AP Exam Prep', 'University Physics Prep'],
       difficulty: 85,
       popular: true,
       new: false,
@@ -62,18 +85,18 @@ const DiscoverPage = () => {
       id: 'ap-physics-c-mechanics',
       title: 'AP Physics C: Mechanics',
       subtitle: 'Calculus-based Mechanics',
-      category: '물리학',
+      category: 'Physics',
       level: 'Advanced',
-      duration: '16주',
+      duration: '16 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.9,
       studentsEnrolled: 8920,
-      instructor: 'Dr. 박역학',
-      description: '미적분을 이용한 역학. 운동, 힘, 에너지, 모멘텀을 심화 학습합니다.',
+      instructor: 'Dr. Park Mechanics',
+      description: 'In-depth study of mechanics using calculus, covering motion, force, energy, and momentum.',
       thumbnail: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
       icon: '📐',
-      features: ['미적분 활용', '고급 문제 해결', 'AP 시험 완벽 대비'],
+      features: ['Calculus Application', 'Advanced Problem Solving', 'Full AP Exam Prep'],
       difficulty: 95,
       popular: false,
       new: true,
@@ -84,42 +107,40 @@ const DiscoverPage = () => {
       id: 'ap-physics-c-em',
       title: 'AP Physics C: E&M',
       subtitle: 'Calculus-based Electricity & Magnetism',
-      category: '물리학',
+      category: 'Physics',
       level: 'Advanced',
-      duration: '16주',
+      duration: '16 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.8,
       studentsEnrolled: 6540,
-      instructor: 'Dr. 이전자',
-      description: '미적분을 이용한 전기와 자기학. Maxwell 방정식까지 다룹니다.',
+      instructor: 'Dr. Lee Electronics',
+      description: 'Electricity and magnetism using calculus, up to Maxwell\'s equations.',
       thumbnail: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       icon: '⚡',
-      features: ['Maxwell 방정식', '전자기 시뮬레이션', 'AP 시험 특화'],
+      features: ['Maxwell\'s Equations', 'Electromagnetic Simulations', 'AP Exam Specialization'],
       difficulty: 98,
       popular: false,
       new: false,
       bestseller: false,
       apCourse: true
     },
-    
-    // AP Calculus
     {
       id: 'ap-calculus-ab',
       title: 'AP Calculus AB',
       subtitle: 'Differential and Integral Calculus',
-      category: '수학',
+      category: 'Mathematics',
       level: 'Intermediate',
-      duration: '32주',
+      duration: '32 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.9,
       studentsEnrolled: 18750,
-      instructor: 'Prof. 정미분',
-      description: '극한, 미분, 적분의 기초부터 응용까지. 대학 미적분학 1에 해당합니다.',
+      instructor: 'Prof. Jane Math',
+      description: 'From basics to applications of limits, differentiation, and integration. Corresponds to university Calculus 1.',
       thumbnail: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
       icon: '∫',
-      features: ['단계별 학습', '그래프 도구', 'AP 시험 완벽 대비'],
+      features: ['Step-by-step Learning', 'Graphing Tools', 'Full AP Exam Prep'],
       difficulty: 75,
       popular: true,
       new: false,
@@ -130,42 +151,40 @@ const DiscoverPage = () => {
       id: 'ap-calculus-bc',
       title: 'AP Calculus BC',
       subtitle: 'Advanced Calculus Topics',
-      category: '수학',
+      category: 'Mathematics',
       level: 'Advanced',
-      duration: '32주',
+      duration: '32 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.8,
       studentsEnrolled: 14200,
-      instructor: 'Prof. 한급수',
-      description: 'AB 내용 + 급수, 매개변수 함수, 극좌표 등 고급 미적분 주제들.',
+      instructor: 'Prof. Han Series',
+      description: 'Covers all AB topics plus advanced calculus subjects like series, parametric functions, and polar coordinates.',
       thumbnail: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
       icon: '∞',
-      features: ['고급 급수', '매개변수 함수', 'AP BC 특화'],
+      features: ['Advanced Series', 'Parametric Functions', 'AP BC Specialization'],
       difficulty: 90,
       popular: true,
       new: false,
       bestseller: false,
       apCourse: true
     },
-    
-    // Pre-AP 기초 과목들
     {
       id: 'precalculus',
       title: 'Pre-Calculus',
-      subtitle: 'Calculus 준비를 위한 기초',
-      category: '수학',
+      subtitle: 'Foundation for Calculus',
+      category: 'Mathematics',
       level: 'Beginner',
-      duration: '24주',
+      duration: '24 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.7,
       studentsEnrolled: 22100,
-      instructor: 'Prof. 김기초',
-      description: '삼각함수, 지수함수, 로그함수 등 미적분학 준비를 위한 필수 내용.',
+      instructor: 'Prof. Kim Foundation',
+      description: 'Essential topics for calculus preparation, including trigonometry, exponential, and logarithmic functions.',
       thumbnail: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
       icon: '📊',
-      features: ['기초 탄탄', '시각적 학습', '미적분 연계'],
+      features: ['Solid Foundation', 'Visual Learning', 'Calculus Connection'],
       difficulty: 60,
       popular: true,
       new: false,
@@ -176,18 +195,18 @@ const DiscoverPage = () => {
       id: 'algebra-2',
       title: 'Algebra 2',
       subtitle: 'Advanced Algebraic Concepts',
-      category: '수학',
+      category: 'Mathematics',
       level: 'Beginner',
-      duration: '24주',
+      duration: '24 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.6,
       studentsEnrolled: 19800,
-      instructor: 'Prof. 박대수',
-      description: '이차함수, 다항함수, 지수함수 등 고급 대수 개념들을 학습합니다.',
+      instructor: 'Prof. Park Algebra',
+      description: 'Learn advanced algebraic concepts such as quadratic functions, polynomials, and exponential functions.',
       thumbnail: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
       icon: '📈',
-      features: ['단계적 학습', '문제 해결', 'Pre-Calc 준비'],
+      features: ['Step-by-step Learning', 'Problem Solving', 'Pre-Calc Prep'],
       difficulty: 50,
       popular: false,
       new: false,
@@ -196,18 +215,18 @@ const DiscoverPage = () => {
     }
   ], []);
 
-  const categories = useMemo(() => ['전체', '물리학', '수학'], []);
-  const levels = useMemo(() => ['전체', 'Beginner', 'Intermediate', 'Advanced'], []);
+  const categories = useMemo(() => ['All', 'Physics', 'Mathematics'], []);
+  const levels = useMemo(() => ['All', 'Beginner', 'Intermediate', 'Advanced'], []);
 
-  // 필터링된 코스 계산
+  // Calculate filtered courses
   useEffect(() => {
     let filtered = allCourses;
 
-    if (selectedCategory !== '전체') {
+    if (selectedCategory !== 'All') {
       filtered = filtered.filter(course => course.category === selectedCategory);
     }
 
-    if (selectedLevel !== '전체') {
+    if (selectedLevel !== 'All') {
       filtered = filtered.filter(course => course.level === selectedLevel);
     }
 
@@ -222,7 +241,7 @@ const DiscoverPage = () => {
     setFilteredCourses(filtered);
   }, [selectedCategory, selectedLevel, searchTerm, allCourses]);
 
-  // 초기 로딩
+  // Initial loading
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -231,9 +250,11 @@ const DiscoverPage = () => {
   }, []);
 
   const handleCourseClick = (courseId) => {
-    navigate(`/course/${courseId}`);
+    // 경로를 /courses/ 로 수정
+    navigate(`/courses/${courseId}`);
   };
-
+  
+  // renderCourseCard 함수 및 나머지 코드는 이전 답변과 동일합니다...
   const renderCourseCard = (course) => (
     <motion.div
       key={course.id}
@@ -259,7 +280,7 @@ const DiscoverPage = () => {
         justifyContent: 'space-between'
       }}
     >
-      {/* 배지들 */}
+      {/* Badges */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
         {course.apCourse && (
           <span style={{
@@ -282,7 +303,7 @@ const DiscoverPage = () => {
             fontSize: '12px',
             fontWeight: 'bold'
           }}>
-            인기
+            Popular
           </span>
         )}
         {course.new && (
@@ -294,17 +315,17 @@ const DiscoverPage = () => {
             fontSize: '12px',
             fontWeight: 'bold'
           }}>
-            신규
+            New
           </span>
         )}
       </div>
 
-      {/* 코스 아이콘 */}
+      {/* Course Icon */}
       <div style={{ fontSize: '48px', marginBottom: '16px' }}>
         {course.icon}
       </div>
 
-      {/* 코스 정보 */}
+      {/* Course Info */}
       <div>
         <h3 style={{ 
           fontSize: '24px', 
@@ -332,7 +353,7 @@ const DiscoverPage = () => {
         </p>
       </div>
 
-      {/* 하단 정보 */}
+      {/* Bottom Info */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -343,7 +364,7 @@ const DiscoverPage = () => {
         <div>
           <div>⭐ {course.rating}</div>
           <div style={{ opacity: 0.8 }}>
-            {course.studentsEnrolled.toLocaleString()}명 수강
+            {course.studentsEnrolled.toLocaleString()} students
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -356,10 +377,10 @@ const DiscoverPage = () => {
         </div>
       </div>
 
-      {/* 난이도 바 */}
+      {/* Difficulty Bar */}
       <div style={{ marginTop: '12px' }}>
         <div style={{ fontSize: '10px', marginBottom: '4px', opacity: 0.8 }}>
-          난이도: {course.difficulty}%
+          Difficulty: {course.difficulty}%
         </div>
         <div style={{
           width: '100%',
@@ -397,7 +418,7 @@ const DiscoverPage = () => {
         >
           🌌
         </motion.div>
-        <h2 style={{ marginLeft: '16px' }}>코스를 불러오는 중...</h2>
+        <h2 style={{ marginLeft: '16px' }}>Loading Courses...</h2>
       </div>
     );
   }
@@ -411,7 +432,7 @@ const DiscoverPage = () => {
     }}>
       <SpaceCanvas />
       
-      {/* 헤더 */}
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -431,14 +452,14 @@ const DiscoverPage = () => {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent'
         }}>
-          AP 과목 탐험하기
+          Explore AP Courses
         </h1>
         <p style={{ fontSize: '18px', opacity: 0.9 }}>
-          고등학생을 위한 AP Physics와 AP Calculus 완벽 정복!
+          Master AP Physics and AP Calculus for high school students!
         </p>
       </motion.div>
 
-      {/* 필터 섹션 */}
+      {/* Filter Section */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -451,11 +472,11 @@ const DiscoverPage = () => {
           marginBottom: '40px'
         }}
       >
-        {/* 검색바 */}
+        {/* Search Bar */}
         <div style={{ marginBottom: '24px' }}>
           <input
             type="text"
-            placeholder="코스 검색..."
+            placeholder="Search courses..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
@@ -472,7 +493,7 @@ const DiscoverPage = () => {
           />
         </div>
 
-        {/* 카테고리 및 레벨 필터 */}
+        {/* Category and Level Filters */}
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -480,7 +501,7 @@ const DiscoverPage = () => {
         }}>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              카테고리
+              Category
             </label>
             <select
               value={selectedCategory}
@@ -505,7 +526,7 @@ const DiscoverPage = () => {
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              난이도
+              Difficulty
             </label>
             <select
               value={selectedLevel}
@@ -530,7 +551,7 @@ const DiscoverPage = () => {
         </div>
       </motion.div>
 
-      {/* 코스 그리드 */}
+      {/* Course Grid */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -565,16 +586,16 @@ const DiscoverPage = () => {
           >
             <div style={{ fontSize: '64px', marginBottom: '24px' }}>🔍</div>
             <h3 style={{ fontSize: '24px', marginBottom: '16px' }}>
-              검색 결과가 없습니다
+              No courses found
             </h3>
             <p style={{ opacity: 0.8 }}>
-              다른 검색어나 필터를 시도해보세요.
+              Try a different search term or filter.
             </p>
           </motion.div>
         )}
       </motion.div>
 
-      {/* 하단 네비게이션 */}
+      {/* Bottom Navigation */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -605,7 +626,7 @@ const DiscoverPage = () => {
             backdropFilter: 'blur(10px)'
           }}
         >
-          대시보드로 돌아가기
+          Back to Dashboard
         </motion.button>
       </motion.div>
     </div>

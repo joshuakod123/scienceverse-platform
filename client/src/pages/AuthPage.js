@@ -20,7 +20,7 @@ const AuthPage = () => {
     if (currentUser) {
       navigate('/dashboard');
     }
-    
+
     // Clear any previous errors when component mounts or mode changes
     return () => {
       if (clearError) clearError();
@@ -54,7 +54,7 @@ const AuthPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (isLoginMode) {
       try {
         const success = await login(formData.email, formData.password);
@@ -106,7 +106,7 @@ const AuthPage = () => {
     <div className="auth-page">
       <div className="auth-container">
         {/* Left Panel - Space Theme */}
-        <motion.div 
+        <motion.div
           className="auth-left-panel"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -117,14 +117,14 @@ const AuthPage = () => {
             <div className="auth-header">
               <span className="logo-text">ScienceVerse</span>
               <div className="auth-nav-buttons">
-                <button 
-                  onClick={() => navigate('/')} 
+                <button
+                  onClick={() => navigate('/')}
                   className="btn-text"
                 >
                   Home
                 </button>
-                <button 
-                  onClick={toggleAuthMode} 
+                <button
+                  onClick={toggleAuthMode}
                   className="btn-primary-small"
                 >
                   {isLoginMode ? 'Sign Up' : 'Login'}
@@ -135,7 +135,7 @@ const AuthPage = () => {
         </motion.div>
 
         {/* Right Panel - Login Form */}
-        <motion.div 
+        <motion.div
           className="auth-right-panel"
           variants={containerVariants}
           initial="hidden"
@@ -150,7 +150,7 @@ const AuthPage = () => {
             </div>
           </div>
 
-          <motion.div 
+          <motion.div
             className="auth-content"
             variants={itemVariants}
           >
@@ -198,7 +198,7 @@ const AuthPage = () => {
 
               {isLoginMode && (
                 <motion.div className="forgot-password" variants={itemVariants}>
-                  <a href="#" onClick={handleForgotPassword}>Forgot password?</a>
+                  <button type="button" onClick={handleForgotPassword} className="switch-btn">Forgot password?</button>
                 </motion.div>
               )}
 
@@ -208,8 +208,8 @@ const AuthPage = () => {
                 <span className="line"></span>
               </motion.div>
 
-              <motion.button 
-                type="button" 
+              <motion.button
+                type="button"
                 className="btn-google"
                 variants={itemVariants}
                 onClick={handleGoogleLogin}
@@ -237,8 +237,8 @@ const AuthPage = () => {
                 {isLoginMode ? 'Login with Google' : 'Sign up with Google'}
               </motion.button>
 
-              <motion.button 
-                type="submit" 
+              <motion.button
+                type="submit"
                 className="btn-submit"
                 variants={itemVariants}
                 disabled={isLoading}
@@ -259,10 +259,10 @@ const AuthPage = () => {
             </motion.div>
 
             <motion.div className="social-links" variants={itemVariants}>
-              <a href="#" className="social-icon facebook">f</a>
-              <a href="#" className="social-icon twitter">t</a>
-              <a href="#" className="social-icon linkedin">in</a>
-              <a href="#" className="social-icon instagram">ig</a>
+              <button type="button" className="social-icon facebook">f</button>
+              <button type="button" className="social-icon twitter">t</button>
+              <button type="button" className="social-icon linkedin">in</button>
+              <button type="button" className="social-icon instagram">ig</button>
             </motion.div>
           </motion.div>
         </motion.div>

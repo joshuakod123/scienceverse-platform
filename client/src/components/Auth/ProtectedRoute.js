@@ -1,8 +1,9 @@
-// client/src/components/ProtectedRoute.js
+// client/src/components/Auth/ProtectedRoute.js
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import { CourseContext } from '../context/CourseContext';
+// 경로 수정: ../ -> ../../
+import { AuthContext } from '../../context/AuthContext';
+import { CourseContext } from '../../context/CourseContext';
 
 const ProtectedRoute = ({ children, courseId, requiresPurchase = false }) => {
   const { currentUser, loading: authLoading } = useContext(AuthContext);
@@ -19,7 +20,8 @@ const ProtectedRoute = ({ children, courseId, requiresPurchase = false }) => {
 
   // 로그인하지 않은 경우
   if (!currentUser) {
-    return <Navigate to="/login" replace />;
+    // 로그인 페이지 경로를 '/auth'로 수정했습니다.
+    return <Navigate to="/auth" replace />;
   }
 
   // 구매가 필요한 코스인 경우
