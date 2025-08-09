@@ -4,6 +4,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import CourseLayout from '../../../components/CourseLayout';
 import { unitData } from '../../../components/course-data/ap-statistics-data';
+export { default as Topic1_1 } from './topic_1_1';
+export { default as Topic1_2 } from './topic_1_2';
+export { default as Topic1_3 } from './topic_1_3';
+export { default as Topic1_4 } from './topic_1_4';
+export { default as Topic1_5 } from './topic_1_5';
+export { default as Topic1_6 } from './topic_1_6';
+export { default as Topic1_7 } from './topic_1_7';
 
 const APStatisticsIndexPage = () => {
   const navigate = useNavigate();
