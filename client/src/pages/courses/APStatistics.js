@@ -3,13 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { unitData } from '../../components/course-data/ap-statistics-data';
+import './APStatisticsRoadmap.css'; // CSS 파일은 별도로 생성
 
 const APStatistics = () => {
   const [unitProgress, setUnitProgress] = useState({});
+  const [activeModal, setActiveModal] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 각 유닛의 진행 상황을 localStorage에서 불러옵니다.
+    // 각 유닛의 진행 상황을 localStorage에서 불러옵니다
     const allProgress = {};
     Object.keys(unitData).forEach((key, index) => {
       const unitId = index + 1;
@@ -19,72 +21,133 @@ const APStatistics = () => {
       allProgress[unitId] = totalTopics > 0 ? (completedTopics.length / totalTopics) * 100 : 0;
     });
     setUnitProgress(allProgress);
+
+    // Progress animation simulation
+    setTimeout(() => {
+      const simulatedProgress = {};
+      Object.keys(unitData).forEach((key, index) => {
+        simulatedProgress[index + 1] = Math.random() * 30;
+      });
+      setUnitProgress(prev => ({ ...prev, ...simulatedProgress }));
+    }, 1000);
   }, []);
 
   const units = Object.keys(unitData).map((key, index) => ({
     id: index + 1,
-    ...unitData[key]
+    number: index + 1,
+    ...unitData[key],
+    topicsList: unitData[key].topics,
+    completed: false,
+    progress: unitProgress[index + 1] || 0
   }));
 
+  const handleUnitClick = (unit) => {
+    setActiveModal(unit);
+  };
+
+  const handleTopicClick = (unitNumber, topicId) => {
+    navigate(`/courses/ap-statistics/${unitNumber}/${topicId}`);
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white">
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 mb-4">
-            AP Statistics
-          </h1>
-          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Master statistical thinking and data analysis through hands-on exploration of real-world data.
-          </p>
-        </div>
+    <div className="ap-statistics-roadmap">
+      {/* Floating Background Elements */}
+      <div className="floating-element"></div>
+      <div className="floating-element"></div>
 
-        {/* Units Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {units.map((unit) => (
+      {/* Header */}
+      <div className="header">
+        <h1>AP Statistics</h1>
+        <p>Master statistical thinking and data analysis through hands-on exploration of real-world data</p>
+      </div>
+
+      {/* Roadmap Container */}
+      <div className="roadmap-container">
+        {/* SVG Path Connection */}
+        <svg className="path-svg" viewBox="0 0 1200 2000">
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{ stopColor: '#667eea', stopOpacity: 0.5 }} />
+              <stop offset="100%" style={{ stopColor: '#764ba2', stopOpacity: 0.5 }} />
+            </linearGradient>
+          </defs>
+          <path 
+            className="path-line" 
+            d="M 600 100 Q 300 250 600 400 T 600 700 Q 300 850 600 1000 T 600 1300 Q 300 1450 600 1600 T 600 1900" 
+          />
+        </svg>
+
+        {/* Roadmap Grid */}
+        <div className="roadmap">
+          {units.map((unit, index) => (
             <div 
-              key={unit.id} 
-              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 shadow-lg hover:shadow-purple-500/20 hover:border-purple-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col cursor-pointer"
-              onClick={() => navigate(`/courses/ap-statistics/${unit.id}`)}
+              key={unit.id}
+              className={`unit-node ${unit.completed ? 'completed' : ''}`}
+              style={{ animationDelay: `${index * 0.1}s` }}
+              onClick={() => handleUnitClick(unit)}
             >
-              {/* Unit Header */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold shadow-md">
-                  {unit.id}
+              <div className="node-circle">{unit.number}</div>
+              <div className="node-content">
+                <h3>Unit {unit.number}: {unit.title}</h3>
+                <p className="description">{unit.description}</p>
+                <div className="node-meta">
+                  <div className="meta-item">
+                    <span className="icon">📚</span>
+                    <span>{unit.topicsList.length} Topics</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="icon">⏱</span>
+                    <span>{unit.pacing}</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="icon">📊</span>
+                    <span>{unit.examWeight} Exam Weight</span>
+                  </div>
                 </div>
-                <span className="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-xs font-semibold">
-                  {unit.examWeight}
-                </span>
-              </div>
-
-              {/* Unit Content */}
-              <div className="flex-grow">
-                <h3 className="text-xl font-bold text-gray-100 mb-2">{unit.title}</h3>
-                <p className="text-gray-400 text-sm mb-4 leading-relaxed h-20 overflow-hidden">
-                  {unit.description}
-                </p>
-              </div>
-
-              {/* Unit Meta & Progress */}
-              <div>
-                <div className="flex justify-between text-xs text-gray-400 mb-2">
-                  <span>{unit.pacing}</span>
-                  <span>{unit.topics.length} Topics</span>
-                </div>
-                <div className="bg-gray-700 h-2.5 rounded-full overflow-hidden">
+                <div className="progress-bar">
                   <div 
-                    className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-500"
-                    style={{ width: `${unitProgress[unit.id] || 0}%` }}
+                    className="progress-fill" 
+                    style={{ width: `${unit.progress}%` }}
                   ></div>
-                </div>
-                <div className="text-right text-xs text-gray-500 mt-1">
-                  {Math.round(unitProgress[unit.id] || 0)}% Complete
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Modal for Topics */}
+      {activeModal && (
+        <div className="modal active" onClick={(e) => {
+          if (e.target.classList.contains('modal')) {
+            closeModal();
+          }
+        }}>
+          <div className="modal-content">
+            <button className="close-btn" onClick={closeModal}>&times;</button>
+            <div className="modal-header">
+              <h2>Unit {activeModal.number}: {activeModal.title}</h2>
+              <p>{activeModal.description}</p>
+            </div>
+            <div className="topics-grid">
+              {activeModal.topicsList.map(topic => (
+                <div 
+                  key={topic.id}
+                  className="topic-item"
+                  onClick={() => handleTopicClick(activeModal.number, topic.id)}
+                >
+                  <h4>{topic.id} - {topic.title}</h4>
+                  <p>{topic.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
