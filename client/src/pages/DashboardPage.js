@@ -1,511 +1,552 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AuthContext } from '../context/AuthContext';
-import SpaceCanvas from '../components/Space/SpaceCanvas';
-import '../styles/Dashboard.css';
 
-const DashboardPage = () => {
-  const navigate = useNavigate();
-  const { currentUser, logout } = useContext(AuthContext);
-  const profileMenuRef = useRef(null);
+const Dashboard = () => {
+  // Theme state - default to dark mode (space theme)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('brainbyte-theme');
+    return saved ? JSON.parse(saved) : true; // Default to dark mode
+  });
+
+  // Stateful user data - currently at 0 since user just started
+  const [userStats] = useState({
+    completedLessons: 0,
+    studyTimeHours: 0,
+    studyTimeMinutes: 0,
+    enrolledCourses: []
+  });
   
-  const [loading, setLoading] = useState(true);
-  const [streak] = useState(7);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [totalXP] = useState(2450);
-  const [currentLevel] = useState(12);
-  const [completedLessons] = useState(89);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
-  // Redirect if not authenticated
+  // Theme persistence
   useEffect(() => {
-    if (!currentUser) {
-      navigate('/auth');
-      return;
-    }
-    
-    // 로딩 시뮬레이션
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, [currentUser, navigate]);
+    localStorage.setItem('brainbyte-theme', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
 
-  // Handle clicks outside the profile menu
+  // Theme configuration
+  const themes = {
+    dark: {
+      name: 'Space Mode',
+      icon: '🌌',
+      background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+      headerBg: 'rgba(30, 60, 114, 0.95)',
+      cardBg: 'rgba(239, 223, 187, 0.1)',
+      textPrimary: '#EFDFBB',
+      textSecondary: 'rgba(239, 223, 187, 0.8)',
+      border: 'rgba(239, 223, 187, 0.2)'
+    },
+    light: {
+      name: 'Solar Mode',
+      icon: '☀️',
+      background: 'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #fd79a8 100%)',
+      headerBg: 'rgba(255, 255, 255, 0.95)',
+      cardBg: 'rgba(255, 255, 255, 0.8)',
+      textPrimary: '#2d3436',
+      textSecondary: '#636e72',
+      border: 'rgba(0, 0, 0, 0.1)'
+    }
+  };
+
+  const currentTheme = isDarkMode ? themes.dark : themes.light;
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
-        setShowProfileMenu(false);
+      if (showProfileDropdown && !event.target.closest('.profile-dropdown-container')) {
+        setShowProfileDropdown(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [showProfileDropdown]);
 
-  // Profile menu position adjustment
-  useEffect(() => {
-    if (showProfileMenu && profileMenuRef.current) {
-      const menu = profileMenuRef.current.querySelector('.profile-menu');
-      if (menu) {
-        const rect = menu.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        
-        // 메뉴가 화면 밖으로 나가는지 확인
-        if (rect.right > viewportWidth) {
-          const overflow = rect.right - viewportWidth + 20; // 20px 여유공간
-          menu.style.transform = `translateX(-${overflow}px)`;
-        }
-      }
-    }
-  }, [showProfileMenu]);
-
-  // Enhanced logout function with confirmation
-  const handleLogout = async () => {
-    const confirmLogout = window.confirm('정말 로그아웃하시겠습니까?');
-    if (!confirmLogout) return;
-
-    try {
-      setShowProfileMenu(false);
-      await logout();
-      navigate('/auth');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Even if logout fails, redirect to auth page
-      navigate('/auth');
-    }
+  // Navigation functions
+  const navigateToProfile = () => {
+    setShowProfileDropdown(false);
+    // Simulate navigation to profile page
+    alert('Navigating to Profile Page...\n(In real app, this would use React Router)');
+    console.log('Navigate to /profile');
   };
 
-  // Profile menu handlers
-  const handleProfileClick = () => {
-    setShowProfileMenu(prevState => !prevState);
+  const navigateToDiscover = () => {
+    // Simulate navigation to discover page  
+    alert('Navigating to Discover Page...\n(In real app, this would use React Router)');
+    console.log('Navigate to /discover');
   };
 
-  const handleDiscoverClick = () => {
-    navigate('/discover');
+  const handleLogout = () => {
+    setShowProfileDropdown(false);
+    // In a real app, this would handle logout logic
+    console.log('Logout clicked');
   };
-
-  // User display name
-  const userDisplayName = currentUser?.username || currentUser?.fullName || '사용자';
-
-  // Mock course data
-  const courses = [
-    {
-      id: 'classical-mechanics',
-      title: 'Classical Mechanics',
-      subtitle: 'Motion and Forces',
-      category: 'Physics',
-      level: 'Intermediate',
-      duration: '12 weeks',
-      progress: 65,
-      color: 'linear-gradient(135deg, #722F37 0%, #E85A4F 100%)',
-      icon: '⚡',
-      studentsEnrolled: 12450,
-      rating: 4.8,
-      nextLesson: 'Newton\'s Third Law'
-    },
-    {
-      id: 'organic-chemistry',
-      title: 'Organic Chemistry',
-      subtitle: 'Carbon Compounds',
-      category: 'Chemistry',
-      level: 'Advanced',
-      duration: '15 weeks',
-      progress: 30,
-      color: 'linear-gradient(135deg, #1E0538 0%, #722F37 100%)',
-      icon: '🧪',
-      studentsEnrolled: 8920,
-      rating: 4.6,
-      nextLesson: 'Alkane Reactions'
-    },
-    {
-      id: 'genetics-evolution',
-      title: 'Genetics & Evolution',
-      subtitle: 'DNA and Heredity',
-      category: 'Biology',
-      level: 'Intermediate',
-      duration: '10 weeks',
-      progress: 80,
-      color: 'linear-gradient(135deg, #0B1026 0%, #1E0538 100%)',
-      icon: '🧬',
-      studentsEnrolled: 15200,
-      rating: 4.9,
-      nextLesson: 'Gene Expression'
-    }
-  ];
-
-  // Mock achievements data
-  const achievements = [
-    { 
-      id: 1, 
-      title: '일주일 연속 학습', 
-      description: '7일 연속으로 학습을 완료했습니다!', 
-      icon: '🔥', 
-      unlocked: true, 
-      date: '2024-01-15' 
-    },
-    { 
-      id: 2, 
-      title: '첫 번째 코스 완료', 
-      description: '첫 번째 코스를 성공적으로 완료했습니다!', 
-      icon: '🎯', 
-      unlocked: true, 
-      date: '2024-01-10' 
-    },
-    { 
-      id: 3, 
-      title: '지식 탐험가', 
-      description: '5개 이상의 다른 과목을 학습했습니다.', 
-      icon: '🌟', 
-      unlocked: false 
-    },
-    { 
-      id: 4, 
-      title: '마스터 학습자', 
-      description: '총 100시간 이상 학습했습니다.', 
-      icon: '👑', 
-      unlocked: false 
-    }
-  ];
-
-  // Loading screen component
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-content">
-          <div className="loading-spinner"></div>
-          <p>우주 탐험을 준비하는 중...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="dashboard-container">
-      {/* Background Space Canvas */}
-      <SpaceCanvas />
-      
-      {/* Particle Overlay */}
-      <div className="particles-overlay">
-        {Array.from({ length: 50 }, (_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 20}s`,
-              animationDuration: `${15 + Math.random() * 10}s`
-            }}
-          />
-        ))}
-      </div>
-
+    <div style={{
+      minHeight: '100vh',
+      background: currentTheme.background,
+      color: currentTheme.textPrimary,
+      fontFamily: 'Inter, sans-serif',
+      transition: 'all 0.3s ease'
+    }}>
       {/* Header */}
-      <motion.header 
-        className="dashboard-header"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="header-left">
-          <motion.h1 
-            className="logo"
-            onClick={() => navigate('/dashboard')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            AP Physics <span>&</span> Calculus
-          </motion.h1>
-          
-          <div className="user-stats">
-            <div className="stat-item">
-              <span className="stat-icon">🔥</span>
-              <span className="stat-value">{streak}일 연속</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">⚡</span>
-              <span className="stat-value">{totalXP} XP</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-icon">🎯</span>
-              <span className="stat-value">레벨 {currentLevel}</span>
-            </div>
-          </div>
+      <div style={{
+        padding: '20px 40px',
+        borderBottom: `1px solid ${currentTheme.border}`,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        background: currentTheme.headerBg,
+        backdropFilter: 'blur(10px)'
+      }}>
+        <div style={{
+          fontSize: '28px',
+          fontWeight: 'bold',
+          background: isDarkMode 
+            ? 'linear-gradient(135deg, #EFDFBB, #E85A4F)'
+            : 'linear-gradient(135deg, #2d3436, #636e72)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
+        }}>
+          BrainByte
         </div>
         
-        <div className="header-right">
-          <motion.button 
-            className="discover-btn"
-            onClick={handleDiscoverClick}
-            whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(239, 223, 187, 0.5)" }}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          {/* Theme Toggle */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            style={{
+              background: currentTheme.cardBg,
+              border: `1px solid ${currentTheme.border}`,
+              borderRadius: '15px',
+              padding: '10px 15px',
+              cursor: 'pointer',
+              color: currentTheme.textPrimary,
+              fontSize: '14px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.3s ease'
+            }}
           >
-            <span className="btn-icon">🔍</span>
-            탐험하기
+            {currentTheme.icon} {currentTheme.name}
           </motion.button>
-          
-          <div className="profile-section" ref={profileMenuRef}>
-            <motion.button 
-              className="profile-btn"
-              onClick={handleProfileClick}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+
+          {/* Profile Dropdown */}
+          <div 
+            className="profile-dropdown-container"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              position: 'relative'
+            }}
+          >
+            <div 
+              style={{
+                background: currentTheme.cardBg,
+                padding: '10px 20px',
+                borderRadius: '15px',
+                border: `1px solid ${currentTheme.border}`,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
             >
-              <div className="profile-avatar">
-                {userDisplayName.charAt(0).toUpperCase()}
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: isDarkMode 
+                  ? 'linear-gradient(135deg, #E85A4F, #722F37)'
+                  : 'linear-gradient(135deg, #fd79a8, #fdcb6e)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}>
+                T
               </div>
-              <span className="profile-name">{userDisplayName}</span>
-            </motion.button>
+              testuser ▼
+            </div>
             
             <AnimatePresence>
-              {showProfileMenu && (
+              {showProfileDropdown && (
                 <motion.div
-                  className="profile-menu"
-                  initial={{ opacity: 0, y: -10, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  style={{
+                    position: 'absolute',
+                    top: '60px',
+                    right: '0',
+                    background: isDarkMode 
+                      ? 'rgba(30, 60, 114, 0.95)' 
+                      : 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    border: `1px solid ${currentTheme.border}`,
+                    borderRadius: '15px',
+                    padding: '10px 0',
+                    minWidth: '200px',
+                    zIndex: 1000,
+                    boxShadow: isDarkMode 
+                      ? '0 8px 25px rgba(0, 0, 0, 0.3)'
+                      : '0 8px 25px rgba(0, 0, 0, 0.1)'
+                  }}
                 >
-                  <button className="menu-item" onClick={() => navigate('/profile')}>
-                    <span>👤</span> 프로필
-                  </button>
-                  <button className="menu-item" onClick={() => navigate('/settings')}>
-                    <span>⚙️</span> 설정
-                  </button>
-                  <button className="menu-item" onClick={() => navigate('/achievements')}>
-                    <span>🏆</span> 업적
-                  </button>
-                  <hr className="menu-divider" />
-                  <button className="menu-item logout" onClick={handleLogout}>
-                    <span>🚪</span> 로그아웃
-                  </button>
+                  <div 
+                    style={{
+                      padding: '12px 20px',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s ease',
+                      fontSize: '14px',
+                      color: currentTheme.textPrimary
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = currentTheme.cardBg}
+                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                    onClick={navigateToProfile}
+                  >
+                    👤 View Profile
+                  </div>
+                  <div 
+                    style={{
+                      padding: '12px 20px',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s ease',
+                      fontSize: '14px',
+                      color: currentTheme.textPrimary
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = currentTheme.cardBg}
+                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                    onClick={() => {
+                      console.log('Navigate to settings');
+                      setShowProfileDropdown(false);
+                    }}
+                  >
+                    ⚙️ Settings
+                  </div>
+                  <div 
+                    style={{
+                      padding: '12px 20px',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s ease',
+                      fontSize: '14px',
+                      borderTop: `1px solid ${currentTheme.border}`,
+                      marginTop: '8px',
+                      color: currentTheme.textPrimary
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = currentTheme.cardBg}
+                    onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                    onClick={handleLogout}
+                  >
+                    🚪 Logout
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
-      </motion.header>
+      </div>
 
-      {/* Main Content */}
-      <main className="dashboard-main">
-        <div className="main-content">
-          
-          {/* Welcome Section */}
-          <motion.section 
-            className="welcome-section"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <h2 className="welcome-title">
-              안녕하세요, {userDisplayName}님! 🚀
-            </h2>
-            <p className="welcome-subtitle">
-              오늘도 새로운 지식의 우주를 탐험해보세요
-            </p>
-            <div className="progress-overview">
-              <div className="progress-item">
-                <span className="progress-label">완료한 레슨</span>
-                <span className="progress-value">{completedLessons}개</span>
+      <div style={{ padding: '40px' }}>
+        {/* Welcome Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            textAlign: 'center',
+            marginBottom: '60px'
+          }}
+        >
+          <h1 style={{
+            fontSize: '36px',
+            fontWeight: 'bold',
+            marginBottom: '15px',
+            color: currentTheme.textPrimary
+          }}>
+            Hello, testuser! 🚀
+          </h1>
+          <p style={{
+            fontSize: '18px',
+            color: currentTheme.textSecondary,
+            marginBottom: '40px'
+          }}>
+            Ready to explore the universe of knowledge today?
+          </p>
+
+          {/* Quick Action Buttons */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            marginBottom: '40px'
+          }}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={navigateToDiscover}
+              style={{
+                background: isDarkMode 
+                  ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                  : 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
+                border: 'none',
+                borderRadius: '15px',
+                padding: '15px 30px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+              }}
+            >
+              🔍 Explore Courses
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => alert('Continue Learning feature coming soon!')}
+              style={{
+                background: isDarkMode 
+                  ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)'
+                  : 'linear-gradient(135deg, #00b894 0%, #00cec9 100%)',
+                border: 'none',
+                borderRadius: '15px',
+                padding: '15px 30px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+              }}
+            >
+              📚 Continue Learning
+            </button>
+          </div>
+
+          {/* Current Stats */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '60px',
+            marginBottom: '40px'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '32px',
+                fontWeight: 'bold',
+                color: isDarkMode ? '#4CAF50' : '#00b894'
+              }}>
+                {userStats.completedLessons}
               </div>
-              <div className="progress-item">
-                <span className="progress-label">이번 주 학습시간</span>
-                <span className="progress-value">12시간 30분</span>
-              </div>
-            </div>
-          </motion.section>
-
-          {/* Achievements Section */}
-          <motion.section 
-            className="achievements-section"
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <h3 className="section-title">최근 업적 🏆</h3>
-            <div className="achievements-grid">
-              {achievements.slice(0, 4).map((achievement) => (
-                <motion.div
-                  key={achievement.id}
-                  className={`achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}`}
-                  whileHover={{ scale: achievement.unlocked ? 1.05 : 1.02, y: -3 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="achievement-icon">{achievement.icon}</div>
-                  <div className="achievement-content">
-                    <h4 className="achievement-title">{achievement.title}</h4>
-                    <p className="achievement-description">{achievement.description}</p>
-                    {achievement.unlocked && achievement.date && (
-                      <span className="achievement-date">달성일: {achievement.date}</span>
-                    )}
-                  </div>
-                  {achievement.unlocked && <div className="achievement-badge">✓</div>}
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
-
-          {/* Current Courses Section */}
-          <motion.section 
-            className="courses-section"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <div className="section-header">
-              <h3 className="section-title">진행 중인 코스 📚</h3>
-              <motion.button 
-                className="view-all-btn"
-                onClick={() => navigate('/courses')}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                모두 보기
-              </motion.button>
+              <div style={{ fontSize: '14px', color: currentTheme.textSecondary }}>Completed Lessons</div>
             </div>
             
-            <div className="courses-grid">
-              {courses.map((course, index) => (
-                <motion.div
-                  key={course.id}
-                  className="course-card"
-                  whileHover={{ scale: 1.03, y: -8 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate(`/course/${course.id}`)}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1 }}
-                  style={{ background: course.color }}
-                >
-                  <div className="course-header">
-                    <div className="course-icon">{course.icon}</div>
-                    <div className="course-level">{course.level}</div>
-                  </div>
-                  
-                  <div className="course-content">
-                    <h4 className="course-title">{course.title}</h4>
-                    <p className="course-subtitle">{course.subtitle}</p>
-                    
-                    <div className="course-meta">
-                      <span className="course-category">{course.category}</span>
-                      <span className="course-duration">{course.duration}</span>
-                    </div>
-                    
-                    <div className="course-stats">
-                      <div className="stat">
-                        <span className="stat-label">학생 수</span>
-                        <span className="stat-value">{course.studentsEnrolled.toLocaleString()}</span>
-                      </div>
-                      <div className="stat">
-                        <span className="stat-label">평점</span>
-                        <span className="stat-value">⭐ {course.rating}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="progress-section">
-                      <div className="progress-info">
-                        <span className="progress-label">진행률</span>
-                        <span className="progress-percentage">{course.progress}%</span>
-                      </div>
-                      <div className="progress-bar">
-                        <motion.div 
-                          className="progress-fill"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${course.progress}%` }}
-                          transition={{ duration: 1, delay: 1 + index * 0.1 }}
-                        />
-                      </div>
-                      <div className="next-lesson">
-                        다음: {course.nextLesson}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <motion.button 
-                    className="continue-btn"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/lesson/${course.id}/current`);
-                    }}
-                  >
-                    계속하기
-                  </motion.button>
-                </motion.div>
-              ))}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '32px', 
+                fontWeight: 'bold',
+                color: isDarkMode ? '#FF6B6B' : '#e17055'
+              }}>
+                {userStats.studyTimeHours}h {userStats.studyTimeMinutes}m
+              </div>
+              <div style={{ fontSize: '14px', color: currentTheme.textSecondary }}>This Week's Study Time</div>
             </div>
-          </motion.section>
 
-          {/* Quick Actions Section */}
-          <motion.section 
-            className="actions-section"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-          >
-            <h3 className="section-title">빠른 액션 ⚡</h3>
-            <div className="actions-grid">
-              <motion.div 
-                className="action-btn practice"
-                whileHover={{ scale: 1.05, rotateY: 5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/practice')}
-              >
-                <div className="action-icon">📝</div>
-                <div className="action-content">
-                  <h4>연습 문제</h4>
-                  <p>실력을 테스트해보세요</p>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="action-btn study-plan"
-                whileHover={{ scale: 1.05, rotateY: 5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/study-plan')}
-              >
-                <div className="action-icon">📅</div>
-                <div className="action-content">
-                  <h4>학습 계획</h4>
-                  <p>맞춤형 계획을 세워보세요</p>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="action-btn community"
-                whileHover={{ scale: 1.05, rotateY: 5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/community')}
-              >
-                <div className="action-icon">👥</div>
-                <div className="action-content">
-                  <h4>커뮤니티</h4>
-                  <p>다른 학생들과 소통하세요</p>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="action-btn resources"
-                whileHover={{ scale: 1.05, rotateY: 5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/resources')}
-              >
-                <div className="action-icon">📚</div>
-                <div className="action-content">
-                  <h4>학습 자료</h4>
-                  <p>추가 자료를 확인하세요</p>
-                </div>
-              </motion.div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: '32px', 
+                fontWeight: 'bold',
+                color: isDarkMode ? '#4ECDC4' : '#00cec9'
+              }}>
+                {userStats.enrolledCourses.length}
+              </div>
+              <div style={{ fontSize: '14px', color: currentTheme.textSecondary }}>Enrolled Courses</div>
             </div>
-          </motion.section>
-        </div>
-      </main>
+          </div>
+        </motion.div>
+
+        {/* Quick Overview Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{ marginBottom: '60px' }}
+        >
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            marginBottom: '30px',
+            textAlign: 'center',
+            color: currentTheme.textPrimary
+          }}>
+            Quick Overview 📊
+          </h2>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '20px',
+            maxWidth: '1000px',
+            margin: '0 auto'
+          }}>
+            {/* Recent Activity */}
+            <div style={{
+              background: currentTheme.cardBg,
+              border: `1px solid ${currentTheme.border}`,
+              borderRadius: '20px',
+              padding: '25px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '40px', marginBottom: '15px' }}>📈</div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: '0 0 10px 0',
+                color: currentTheme.textPrimary
+              }}>
+                Recent Activity
+              </h3>
+              <p style={{
+                fontSize: '14px',
+                color: currentTheme.textSecondary,
+                margin: 0
+              }}>
+                No recent activity yet. Start your first lesson!
+              </p>
+            </div>
+
+            {/* Achievements */}
+            <div style={{
+              background: currentTheme.cardBg,
+              border: `1px solid ${currentTheme.border}`,
+              borderRadius: '20px',
+              padding: '25px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '40px', marginBottom: '15px' }}>🏆</div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: '0 0 10px 0',
+                color: currentTheme.textPrimary
+              }}>
+                Achievements
+              </h3>
+              <p style={{
+                fontSize: '14px',
+                color: currentTheme.textSecondary,
+                margin: 0
+              }}>
+                Start learning to unlock achievements!
+              </p>
+            </div>
+
+            {/* Study Schedule */}
+            <div style={{
+              background: currentTheme.cardBg,
+              border: `1px solid ${currentTheme.border}`,
+              borderRadius: '20px',
+              padding: '25px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '40px', marginBottom: '15px' }}>📅</div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: '0 0 10px 0',
+                color: currentTheme.textPrimary
+              }}>
+                Study Schedule
+              </h3>
+              <p style={{
+                fontSize: '14px',
+                color: currentTheme.textSecondary,
+                margin: 0
+              }}>
+                Set up your personalized study plan
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Getting Started Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            marginBottom: '30px',
+            textAlign: 'center',
+            color: currentTheme.textPrimary
+          }}>
+            Getting Started 🎯
+          </h2>
+          
+          <div style={{
+            background: currentTheme.cardBg,
+            border: `1px solid ${currentTheme.border}`,
+            borderRadius: '20px',
+            padding: '40px',
+            maxWidth: '800px',
+            margin: '0 auto',
+            textAlign: 'center'
+          }}>
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              margin: '0 0 20px 0',
+              color: currentTheme.textPrimary
+            }}>
+              Welcome to BrainByte! 🎉
+            </h3>
+            <p style={{
+              fontSize: '16px',
+              color: currentTheme.textSecondary,
+              marginBottom: '30px',
+              lineHeight: '1.6'
+            }}>
+              You haven't enrolled in any courses yet. Explore our AP Physics and Calculus courses designed specifically for high school students. Start your journey to academic excellence!
+            </p>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={navigateToDiscover}
+              style={{
+                background: isDarkMode 
+                  ? 'linear-gradient(135deg, #E85A4F 0%, #722F37 100%)'
+                  : 'linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%)',
+                border: 'none',
+                borderRadius: '15px',
+                padding: '15px 40px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+              }}
+            >
+              🚀 Start Exploring Courses
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };
 
-export default DashboardPage;
+export default Dashboard;
