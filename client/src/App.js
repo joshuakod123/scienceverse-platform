@@ -8,7 +8,7 @@ import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
-import DiscoverPage from './pages/DiscoverPage';
+// DiscoverPage import 제거
 import LessonPage from './pages/LessonPage';
 import ProfilePage from './pages/ProfilePage';
 import PurchasePage from './pages/PurchasePage';
@@ -52,7 +52,7 @@ function App() {
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/home" element={<HomePage />} />
                   <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/discover" element={<DiscoverPage />} />
+                  {/* /discover 라우트 제거 */}
                   <Route path="/survey" element={<SurveyPage />} />
                   
                   {/* Protected Routes */}
