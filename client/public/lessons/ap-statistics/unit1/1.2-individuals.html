@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AP Statistics — Unit 1.2 (Refined): Individuals & Variables</title>
+<style>
+  :root{
+    --bg:#0b0e13; --panel:#111827; --ink:#eef2ff; --muted:#a9b1c6; --line:rgba(255,255,255,.14);
+    --good:#3cc47c; --bad:#ff6b6b; --accent:#7aa2f7; --accent2:#bb9af7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial; color:var(--ink);
+       background:radial-gradient(1200px 600px at 70% -10%, #1b2336 0%, #0b0e13 60%)}
+  header{position:sticky; top:0; z-index:10; padding:22px 16px; text-align:center; background:linear-gradient(180deg, rgba(11,14,19,.92), rgba(11,14,19,.5) 60%, transparent); border-bottom:1px solid var(--line); backdrop-filter:saturate(1.2) blur(6px)}
+  h1{margin:0 0 6px; font-size:24px}
+  .sub{color:var(--muted); font-size:14px}
+  main{max-width:1150px; margin:18px auto 80px; padding:0 16px; display:grid; gap:18px}
+  section{background:linear-gradient(160deg, rgba(122,162,247,.07), rgba(187,154,247,.06)); border:1px solid rgba(122,162,247,.18); border-radius:16px; padding:18px}
+  h2{margin:0 0 8px; font-size:20px}
+  p,li{color:var(--muted)}
+  .pill{display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; background:linear-gradient(90deg, rgba(122,162,247,.35), rgba(187,154,247,.35)); border:1px solid rgba(122,162,247,.5); color:#e9edff; margin-right:6px}
+  .btn{appearance:none; border:1px solid rgba(255,255,255,.25); background:#0e1524; color:#eaf0ff; padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:700}
+  .btn.primary{background:linear-gradient(90deg, rgba(122,162,247,.28), rgba(187,154,247,.28))}
+  .btn.ghost{background:transparent}
+  .grid{display:grid; gap:14px}
+  .g2{grid-template-columns:repeat(2, minmax(0,1fr))}
+  @media (max-width:900px){.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px}
+  .small{font-size:12px; color:var(--muted)}
+  table{width:100%; border-collapse:collapse; font-size:14px}
+  th, td{border:1px solid var(--line); padding:8px; text-align:left}
+  th{background:#0c1220}
+  select,input[type="number"],input[type="text"]{background:#0b1220; color:#eef2ff; border:1px solid var(--line); border-radius:8px; padding:6px}
+  .feedback{margin-top:6px; font-size:13px; padding:8px 10px; border-radius:10px}
+  .ok{color:var(--good); border:1px solid rgba(60,196,124,.5); background:rgba(60,196,124,.08)}
+  .err{color:var(--bad); border:1px solid rgba(255,107,107,.5); background:rgba(255,107,107,.08)}
+  /* SVG chart frame */
+  .svgwrap{background:#0a0f1b; border:1px solid var(--line); border-radius:12px; padding:12px}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .legend{display:flex; gap:12px; flex-wrap:wrap; font-size:12px}
+  .sw{display:inline-block; width:12px; height:12px; border:1px solid rgba(255,255,255,.5); border-radius:3px; margin-right:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Unit 1.2 (Refined) — Individuals & Variables</h1>
+  <div class="sub">AP Statistics • Identify individuals & variables • Categorical vs Quantitative (Discrete/Continuous) • Clear visuals</div>
+</header>
+<main>
+  <section aria-labelledby="goals">
+    <h2 id="goals">Learning Goals</h2>
+    <p>
+      <span class="pill">VAR-1</span>
+      <span class="pill">Skill 1.B</span>
+    </p>
+    <ul>
+      <li>Identify <strong>individuals</strong> (who/what is measured) & <strong>variables</strong> (attributes).</li>
+      <li>Classify variables: <em>categorical</em>, <em>quantitative—discrete</em>, <em>quantitative—continuous</em>, or <em>identifier</em>.</li>
+      <li>Explain <em>why</em> each type fits (with feedback for common misconceptions).</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="dataset">
+    <h2 id="dataset">Mini‑Dataset (editable)</h2>
+    <div class="card">
+      <div style="overflow-x:auto">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Favorite Color</th>
+              <th>Height (cm)</th>
+              <th>Siblings</th>
+              <th>Commute (min)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1001</td><td>Ana</td><td>Blue</td>
+              <td><input type="number" value="168"/></td>
+              <td><input type="number" value="2"/></td>
+              <td><input type="number" value="18"/></td>
+            </tr>
+            <tr>
+              <td>1002</td><td>Ben</td><td>Green</td>
+              <td><input type="number" value="181"/></td>
+              <td><input type="number" value="0"/></td>
+              <td><input type="number" value="7"/></td>
+            </tr>
+            <tr>
+              <td>1003</td><td>Chia</td><td>Red</td>
+              <td><input type="number" value="159"/></td>
+              <td><input type="number" value="1"/></td>
+              <td><input type="number" value="31"/></td>
+            </tr>
+            <tr>
+              <td>1004</td><td>Drew</td><td>Blue</td>
+              <td><input type="number" value="172"/></td>
+              <td><input type="number" value="3"/></td>
+              <td><input type="number" value="15"/></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="shuffle">Randomize heights/commutes</button>
+        <span class="small">Edit any cell; visuals update instantly.</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="classify">
+    <h2 id="classify">Interactive — Classify Variables (with feedback)</h2>
+    <p>Pick the best type for each column. Click <strong>Check</strong> for immediate explanations; wrong picks show why.</p>
+    <div class="card" id="classifyBox"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn primary" id="check">Check</button>
+      <button class="btn ghost" id="reset">Reset</button>
+      <span class="small">Definitions: <em>Discrete</em> counts whole steps. <em>Continuous</em> can take any value in an interval.</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="viz">
+    <h2 id="viz">Quick Visuals (clearer)</h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3 style="margin-top:0">Favorite Color — Bar Chart</h3>
+        <div class="row">
+          <label>Scale
+            <select id="scaleCat">
+              <option value="count">Count</option>
+              <option value="percent">Percent</option>
+            </select>
+          </label>
+        </div>
+        <div class="svgwrap">
+          <svg id="barSVG" role="img" aria-label="Bar chart of favorite colors" width="100%" height="320"></svg>
+        </div>
+        <div class="legend" id="catLegend" style="margin-top:6px"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Height (cm) — Histogram</h3>
+        <div class="row">
+          <label>Bins <input type="range" id="bins" min="5" max="20" value="8"></label>
+          <label><input type="checkbox" id="relHist"> Relative (%)</label>
+        </div>
+        <div class="svgwrap">
+          <svg id="histSVG" role="img" aria-label="Histogram of heights" width="100%" height="320"></svg>
+        </div>
+        <p class="small">Axes & gridlines included. Hover bars for details.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="exit">
+    <h2 id="exit">Exit Ticket</h2>
+    <div class="card">
+      <p>Which variable(s) are <strong>quantitative</strong>? Explain why Student ID is <em>not</em> quantitative.</p>
+      <textarea id="exitAns" style="width:100%; min-height:90px; background:#0b1220; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="saveExit">Save Locally</button>
+        <span id="savedMsg" class="small"></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ---------- Data & helpers ----------
+const columns = [
+  {name:'Student ID', key:'id', gold:'identifier', why:{
+    correct:'Identifier — labels records; numbers are codes, not measurements.',
+    pitfalls:[
+      ['categorical','IDs aren\'t categories with repeated levels; each is usually unique.'],
+      ['quant-disc','Numeric-looking but arithmetic on IDs is meaningless (ID 2000 is not \"twice\" ID 1000).'],
+      ['quant-cont','Continuous implies measurement on a scale; IDs are not measured.']
+    ]}},
+  {name:'Name', key:'name', gold:'categorical', why:{
+    correct:'Categorical — names indicate group labels/levels, not amounts.',
+    pitfalls:[['identifier','A name could identify, but here multiple people can share a name; we use Student ID as the identifier.'],
+              ['quant-disc','Numbers aren\'t involved.'],['quant-cont','Not measured on a continuous scale.']] }},
+  {name:'Favorite Color', key:'color', gold:'categorical', why:{
+    correct:'Categorical — color is a qualitative label.',
+    pitfalls:[['quant-disc','Counts belong to Siblings, not Color.'],['quant-cont','No meaningful unit/scale.'],['identifier','Colors aren\'t unique labels.']] }},
+  {name:'Height (cm)', key:'height', gold:'quant-cont', why:{
+    correct:'Quantitative — Continuous. Height can vary by any fractional amount and is measured on a scale with units (cm).',
+    pitfalls:[['quant-disc','Heights are not restricted to whole numbers.'],['categorical','Heights are numeric measurements.'],['identifier','Not a label.']] }},
+  {name:'Siblings', key:'siblings', gold:'quant-disc', why:{
+    correct:'Quantitative — Discrete. You count whole people; values jump in integers 0,1,2,…',
+    pitfalls:[['quant-cont','No half-sibling counts like 2.4 (biologically you still count whole people).'],['categorical','We can categorize by \"has siblings\" but the variable itself is a count.']] }},
+  {name:'Commute (min)', key:'commute', gold:'quant-cont', why:{
+    correct:'Quantitative — Continuous. Time can take any value to needed precision (e.g., 12.7 min).',
+    pitfalls:[['quant-disc','We can round minutes, but the underlying variable is continuous.'],['categorical','Time isn\'t a label.'],['identifier','Not a code.']] }}
+];
+
+const COLORS = ['#7aa2f7','#bb9af7','#7dc5a4','#f6c453','#e46896','#7cc0e6','#d0a8ff'];
+
+function getTableData(){
+  const rows = [...document.querySelectorAll('#tbl tbody tr')];
+  return rows.map(r=>{
+    const tds = r.querySelectorAll('td');
+    return {
+      id: tds[0].textContent.trim(),
+      name: tds[1].textContent.trim(),
+      color: tds[2].textContent.trim(),
+      height: Number(tds[3].querySelector('input').value),
+      siblings: Number(tds[4].querySelector('input').value),
+      commute: Number(tds[5].querySelector('input').value)
+    };
+  });
+}
+
+// ---------- Classification UI ----------
+function renderClassify(){
+  const box=document.getElementById('classifyBox');
+  box.innerHTML='';
+  columns.forEach((col,i)=>{
+    const row=document.createElement('div');
+    row.className='card'; row.style.margin='8px 0';
+    row.innerHTML = `
+      <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:12px; align-items:center">
+        <div><strong>${i+1}. ${col.name}</strong></div>
+        <div>
+          <select data-key="${col.key}">
+            <option value="">— choose type —</option>
+            <option value="categorical">Categorical</option>
+            <option value="quant-disc">Quantitative — Discrete</option>
+            <option value="quant-cont">Quantitative — Continuous</option>
+            <option value="identifier">Identifier (ID label)</option>
+          </select>
+        </div>
+      </div>
+      <div class="feedback" data-fb style="display:none"></div>
+    `;
+    box.appendChild(row);
+  });
+}
+
+function checkClassify(){
+  document.querySelectorAll('#classifyBox .card').forEach((card, idx)=>{
+    const col = columns[idx];
+    const sel = card.querySelector('select');
+    const fb = card.querySelector('[data-fb]');
+    const pick = sel.value;
+    if(!pick){ fb.style.display='none'; sel.style.borderColor='var(--line)'; return; }
+    if(pick===col.gold){
+      sel.style.borderColor='rgba(60,196,124,.7)';
+      fb.className='feedback ok'; fb.style.display='block';
+      fb.textContent = `Correct — ${col.why.correct}`;
+    } else {
+      sel.style.borderColor='rgba(255,107,107,.7)';
+      fb.className='feedback err'; fb.style.display='block';
+      const pit = col.why.pitfalls.find(p=>p[0]===pick);
+      const extra = pit? pit[1] : 'See definition notes above.';
+      fb.textContent = `Not quite. Correct type: ${label(col.gold)}. ${extra}`;
+    }
+  });
+}
+
+function label(v){
+  return v==='categorical'?'Categorical': v==='quant-disc'?'Quantitative — Discrete': v==='quant-cont'?'Quantitative — Continuous':'Identifier';
+}
+
+function resetClassify(){ renderClassify(); }
+
+// ---------- Charts (SVG, clear axes) ----------
+function size(svg){ const r=svg.getBoundingClientRect(); return {w:r.width||700, h:r.height||320}; }
+
+function drawBar(){
+  const svg=document.getElementById('barSVG');
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const {w,h}=size(svg); const pad={l:48,r:12,t:18,b:40};
+  const data=getTableData();
+  const counts={}; data.forEach(d=>{ counts[d.color]=(counts[d.color]||0)+1; });
+  const cats=Object.keys(counts); const vals=cats.map(c=>counts[c]);
+  const total=vals.reduce((a,b)=>a+b,0)||1;
+  const scaleType=document.getElementById('scaleCat').value; // count or percent
+  const maxY = scaleType==='count'? Math.max(...vals,1) : 100;
+
+  // axes
+  const plotW=w-pad.l-pad.r, plotH=h-pad.t-pad.b;
+  const xStep=plotW/cats.length; const barW=Math.max(22, xStep*0.7);
+  const grid=5;
+  for(let i=0;i<=grid;i++){
+    const y=pad.t + plotH - (i/grid)*plotH;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', pad.l); line.setAttribute('x2', w-pad.r);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('stroke','rgba(255,255,255,.12)');
+    svg.appendChild(line);
+    const lab=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lab.setAttribute('x', pad.l-8); lab.setAttribute('y', y+4);
+    lab.setAttribute('text-anchor','end'); lab.setAttribute('font-size','11'); lab.setAttribute('fill','#cbd5ff');
+    lab.textContent = Math.round((maxY*i/grid));
+    svg.appendChild(lab);
+  }
+
+  cats.forEach((c, i)=>{
+    const raw=counts[c];
+    const yVal = scaleType==='count'? raw : raw/total*100;
+    const barH = (yVal/maxY)*plotH;
+    const x = pad.l + i*xStep + (xStep-barW)/2;
+    const y = pad.t + plotH - barH;
+    const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x', x); rect.setAttribute('y', y); rect.setAttribute('width', barW); rect.setAttribute('height', barH);
+    rect.setAttribute('fill', COLORS[i%COLORS.length]); rect.setAttribute('stroke','rgba(255,255,255,.35)');
+    rect.setAttribute('rx','6'); rect.setAttribute('ry','6');
+    rect.setAttribute('title', `${c}: ${scaleType==='count'? raw : (raw/total*100).toFixed(1)+'%'}`);
+    svg.appendChild(rect);
+
+    const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x', x+barW/2); label.setAttribute('y', y-6);
+    label.setAttribute('text-anchor','middle'); label.setAttribute('font-size','12'); label.setAttribute('fill','#eaf0ff');
+    label.textContent = scaleType==='count'? raw : (raw/total*100).toFixed(1)+'%';
+    svg.appendChild(label);
+
+    const tick=document.createElementNS('http://www.w3.org/2000/svg','text');
+    tick.setAttribute('x', x+barW/2); tick.setAttribute('y', h-12);
+    tick.setAttribute('text-anchor','middle'); tick.setAttribute('font-size','12'); tick.setAttribute('fill','#cbd5ff');
+    tick.textContent=c; svg.appendChild(tick);
+  });
+
+  // legend
+  const leg=document.getElementById('catLegend');
+  leg.innerHTML=cats.map((c,i)=>`<span><span class="sw" style="background:${COLORS[i%COLORS.length]}"></span>${c}</span>`).join(' ');
+}
+
+function drawHist(){
+  const svg=document.getElementById('histSVG'); while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const {w,h}=size(svg); const pad={l:48,r:12,t:18,b:40};
+  const data=getTableData().map(d=>d.height).filter(v=>!isNaN(v));
+  if(data.length===0) return;
+  const min=Math.min(...data), max=Math.max(...data);
+  const bins=+document.getElementById('bins').value;
+  const rel=document.getElementById('relHist').checked;
+  const bw=(max-min)/bins || 1;
+  const counts=new Array(bins).fill(0);
+  data.forEach(v=>{ let i=Math.floor((v-min)/bw); if(i<0)i=0; if(i>=bins)i=bins-1; counts[i]++; });
+  const total=data.length;
+  const maxY = rel? Math.max(...counts.map(c=>c/total*100), 1) : Math.max(...counts, 1);
+
+  const plotW=w-pad.l-pad.r, plotH=h-pad.t-pad.b; const xStep=plotW/bins;
+  // grid
+  const grid=5; for(let i=0;i<=grid;i++){ const y=pad.t + plotH - (i/grid)*plotH; const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',pad.l); line.setAttribute('x2',w-pad.r); line.setAttribute('y1',y); line.setAttribute('y2',y); line.setAttribute('stroke','rgba(255,255,255,.12)'); svg.appendChild(line); const lab=document.createElementNS('http://www.w3.org/2000/svg','text'); lab.setAttribute('x', pad.l-8); lab.setAttribute('y', y+4); lab.setAttribute('text-anchor','end'); lab.setAttribute('font-size','11'); lab.setAttribute('fill','#cbd5ff'); lab.textContent = Math.round(maxY*i/grid); svg.appendChild(lab); }
+  for(let i=0;i<bins;i++){
+    const c = counts[i]; const val = rel? (c/total*100) : c; const barH=(val/maxY)*plotH; const x=pad.l + i*xStep + 2; const y=pad.t + plotH - barH; const rect=document.createElementNS('http://www.w3.org/2000/svg','rect'); rect.setAttribute('x', x); rect.setAttribute('y', y); rect.setAttribute('width', xStep-4); rect.setAttribute('height', barH); rect.setAttribute('fill', COLORS[i%COLORS.length]); rect.setAttribute('stroke','rgba(255,255,255,.35)'); rect.setAttribute('rx','4'); rect.setAttribute('ry','4'); rect.setAttribute('title', `${(min+i*bw).toFixed(0)}–${(min+(i+1)*bw).toFixed(0)}: ${rel? val.toFixed(1)+'%': val}`); svg.appendChild(rect);
+    const tick=document.createElementNS('http://www.w3.org/2000/svg','text'); tick.setAttribute('x', pad.l + i*xStep + xStep/2); tick.setAttribute('y', h-12); tick.setAttribute('text-anchor','middle'); tick.setAttribute('font-size','12'); tick.setAttribute('fill','#cbd5ff'); tick.textContent = Math.round(min + i*bw); svg.appendChild(tick);
+  }
+}
+
+// ---------- Utility actions ----------
+function shuffle(){
+  const rows=[...document.querySelectorAll('#tbl tbody tr')];
+  rows.forEach(r=>{
+    const h=r.querySelectorAll('input')[0]; const c=r.querySelectorAll('input')[2]||r.querySelectorAll('td')[5].querySelector('input');
+    h.value = Math.round(150 + (Math.random()-0.5)*50);
+    c.value = Math.max(1, Math.round(20 + (Math.random()-0.5)*30));
+  });
+  drawBar(); drawHist();
+}
+
+function saveExit(){ localStorage.setItem('u12_exit', document.getElementById('exitAns').value); const el=document.getElementById('savedMsg'); el.textContent='Saved locally ✓'; setTimeout(()=>el.textContent='', 2000); }
+
+// ---------- Init & events ----------
+renderClassify();
+
+document.getElementById('check').addEventListener('click', checkClassify);
+document.getElementById('reset').addEventListener('click', resetClassify);
+
+['change','input'].forEach(ev=>{ document.getElementById('tbl').addEventListener(ev, ()=>{ drawBar(); drawHist(); }); });
+
+document.getElementById('scaleCat').addEventListener('change', drawBar);
+document.getElementById('bins').addEventListener('input', drawHist);
+document.getElementById('relHist').addEventListener('change', drawHist);
+document.getElementById('shuffle').addEventListener('click', shuffle);
+
+document.getElementById('saveExit').addEventListener('click', saveExit);
+
+drawBar(); drawHist();
+</script>
+</body>
+</html>

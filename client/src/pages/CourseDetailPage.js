@@ -19,11 +19,9 @@ const CourseDetailPage = () => {
       title: 'AP Statistics',
       subtitle: 'Master statistical thinking and data analysis',
       description: 'Explore data analysis, probability, statistical inference, and experimental design. This comprehensive course prepares you for the AP Statistics exam.',
-      instructor: 'Dr. Evelyn Reed',
       duration: '32 Weeks',
       totalLessons: 90,
       difficulty: 'Advanced',
-      examWeight: '100%',
       icon: '📊',
       gradient: 'linear-gradient(135deg, #0093E9 0%, #80D0C7 100%)',
       features: ['Interactive Data Tools', 'Real-world Scenarios', 'AP Exam Prep']
@@ -299,8 +297,14 @@ const CourseDetailPage = () => {
   };
 
   const handleLessonClick = (unitId, topicIndex) => {
-    // Navigate to lesson page (you can modify this based on your routing structure)
-    navigate(`/lesson/${courseId}-${unitId}-${topicIndex}`);
+    // AP Statistics의 Unit 1, 첫 번째 토픽인 경우 특별한 경로로 이동
+    if (courseId === 'ap-statistics' && unitId === 'unit1' && topicIndex === 0) {
+      navigate('/courses/ap-statistics/lessons/1.1');
+    } else {
+      // 다른 레슨들에 대한 기본 경로 (추후 구현)
+      alert(`Navigating to ${courseId} - ${unitId} - Topic ${topicIndex + 1}`);
+      // 예: navigate(`/lesson/${courseId}-${unitId}-${topicIndex}`);
+    }
   };
 
   const handleBackClick = () => {

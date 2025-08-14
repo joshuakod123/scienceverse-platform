@@ -17,6 +17,9 @@ import ProfilePage from './pages/ProfilePage';
 import PurchasePage from './pages/PurchasePage';
 import SurveyPage from './pages/SurveyPage';
 
+// Lesson Components
+import IntroStatistics from './courses/ap-statistics/unit-1/1.1- IntroStatistics';
+
 // Components
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import DevTools from './components/DevTools';
@@ -60,6 +63,16 @@ function App() {
                   
                   {/* Course Detail Page - Can be accessed by anyone */}
                   <Route path="/courses/:courseId" element={<CourseDetailPage />} />
+
+                  {/* Specific Lesson Route for AP Statistics 1.1 */}
+                  <Route 
+                    path="/courses/ap-statistics/lessons/1.1"
+                    element={
+                      <ProtectedRoute>
+                        <IntroStatistics />
+                      </ProtectedRoute>
+                    }
+                  />
                   
                   {/* Protected Routes */}
                   <Route

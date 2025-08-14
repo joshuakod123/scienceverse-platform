@@ -11,7 +11,7 @@ const Dashboard = () => {
     return saved ? JSON.parse(saved) : true; // Default to dark mode
   });
 
-  // Course data based on the images
+  // Course data based on the images - AP Physics 2 REMOVED
   const [courses] = useState([
     {
       id: 'ap-statistics',
@@ -38,20 +38,6 @@ const Dashboard = () => {
       students: '15,420 students',
       duration: '32 Weeks',
       difficulty: 70,
-      tags: ['AP', 'Popular'],
-      price: 'Free'
-    },
-    {
-      id: 'ap-physics-2',
-      title: 'AP Physics 2',
-      subtitle: 'Advanced Algebra-based Physics',
-      description: 'Covers fluid dynamics, thermodynamics, electromagnetism, optics, and atomic physics.',
-      icon: '🔬',
-      color: 'linear-gradient(135deg, #e17055 0%, #fd79a8 100%)',
-      rating: 4.8,
-      students: '12,100 students',
-      duration: '32 Weeks',
-      difficulty: 85,
       tags: ['AP', 'Popular'],
       price: 'Free'
     },
