@@ -1,14 +1,20 @@
+// File: client/src/pages/PurchasePage.js
+
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { CourseContext } from '../context/CourseContext';
 import '../styles/PurchasePage.css';
 
 const PurchasePage = () => {
-  const { courseId } = useParams();
+  const { courseId: paramCourseId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { purchaseCourse } = useContext(CourseContext);
+  
+  // Get courseId from either URL params or query params
+  const courseId = paramCourseId || searchParams.get('course');
   
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,13 +29,77 @@ const PurchasePage = () => {
     cvv: '',
     paymentMethod: 'credit_card'
   });
+
+  // Mock course data for demo
+  const mockCourseData = {
+    'ap-statistics': {
+      title: 'AP Statistics',
+      subtitle: 'Master statistical thinking and data analysis',
+      category: 'Mathematics',
+      level: 'Advanced',
+      totalDuration: '960',
+      price: 149.99,
+      discountPrice: null,
+      imageUrl: null,
+      lessons: ['lesson-1']
+    },
+    'ap-physics-1': {
+      title: 'AP Physics 1',
+      subtitle: 'Algebra-based Physics',
+      category: 'Physics',
+      level: 'Intermediate',
+      totalDuration: '900',
+      price: 149.99,
+      discountPrice: null,
+      imageUrl: null,
+      lessons: ['lesson-1']
+    },
+    'ap-physics-2': {
+      title: 'AP Physics 2',
+      subtitle: 'Advanced Algebra-based Physics',
+      category: 'Physics',
+      level: 'Advanced',
+      totalDuration: '920',
+      price: 149.99,
+      discountPrice: null,
+      imageUrl: null,
+      lessons: ['lesson-1']
+    },
+    'ap-physics-c-mechanics': {
+      title: 'AP Physics C: Mechanics',
+      subtitle: 'Calculus-based Mechanics',
+      category: 'Physics',
+      level: 'Expert',
+      totalDuration: '480',
+      price: 149.99,
+      discountPrice: null,
+      imageUrl: null,
+      lessons: ['lesson-1']
+    }
+  };
   
   useEffect(() => {
     const fetchCourse = async () => {
+      if (!courseId) {
+        setError('No course specified');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const token = localStorage.getItem('authToken');
         
+        // For demo, use mock data
+        const mockCourse = mockCourseData[courseId];
+        if (mockCourse) {
+          setCourse(mockCourse);
+          setLoading(false);
+          return;
+        }
+
+        // Real API call (commented out for demo)
+        /*
+        const token = localStorage.getItem('authToken');
         const config = {
           headers: {
             'Content-Type': 'application/json',
@@ -39,6 +109,8 @@ const PurchasePage = () => {
         
         const response = await axios.get(`/api/courses/${courseId}`, config);
         setCourse(response.data.data);
+        */
+        
         setLoading(false);
       } catch (error) {
         setError('Failed to load course. Please try again.');
@@ -70,19 +142,24 @@ const PurchasePage = () => {
       
       // In a real app, this would integrate with a payment processor
       // For demo purposes, we're just simulating a successful payment
-      await purchaseCourse(courseId, formData);
-      
-      setPaymentSuccess(true);
-      
-      // Redirect to the lesson page after a short delay
       setTimeout(() => {
-        navigate(`/lesson/${course.lessons[0]}`, { replace: true });
-      }, 3000);
+        setPaymentSuccess(true);
+        
+        // Redirect to the course detail page after a short delay
+        setTimeout(() => {
+          navigate(`/courses/${courseId}`, { replace: true });
+        }, 3000);
+      }, 2000);
+      
     } catch (error) {
       setError('Payment failed. Please try again.');
       console.error('Error processing payment:', error);
       setProcessingPayment(false);
     }
+  };
+
+  const handleBackToCourse = () => {
+    navigate(`/courses/${courseId}`);
   };
   
   if (loading) {
@@ -141,8 +218,8 @@ const PurchasePage = () => {
     <div className="purchase-page">
       <div className="purchase-container">
         <div className="purchase-header">
-          <button onClick={() => navigate(-1)} className="back-btn">
-            &larr; Back
+          <button onClick={handleBackToCourse} className="back-btn">
+            &larr; Back to Course
           </button>
           <h1>Purchase Course</h1>
         </div>
@@ -150,10 +227,12 @@ const PurchasePage = () => {
         <div className="purchase-content">
           <div className="course-summary">
             <div className="course-image">
-              <img 
-                src={course.imageUrl || '/assets/images/default-course.jpg'} 
-                alt={course.title} 
-              />
+              <div className="course-image-placeholder">
+                {courseId === 'ap-statistics' ? '📊' : 
+                 courseId === 'ap-physics-1' ? '⚛️' :
+                 courseId === 'ap-physics-2' ? '🔬' :
+                 courseId === 'ap-physics-c-mechanics' ? '🎯' : '📚'}
+              </div>
             </div>
             <div className="course-info">
               <h2>{course.title}</h2>
@@ -166,119 +245,92 @@ const PurchasePage = () => {
               <div className="course-price">
                 {course.discountPrice ? (
                   <>
-                    <span className="original-price">${course.price.toFixed(2)}</span>
-                    <span className="discount-price">${course.discountPrice.toFixed(2)}</span>
+                    <span className="original-price">${course.price}</span>
+                    <span className="discount-price">${course.discountPrice}</span>
                   </>
                 ) : (
-                  <span className="price">${course.price.toFixed(2)}</span>
+                  <span className="price">FREE</span>
                 )}
               </div>
             </div>
           </div>
           
-          <div className="payment-form-container">
-            <h3>Payment Details</h3>
-            <form onSubmit={handleSubmit} className="payment-form">
+          <form className="payment-form" onSubmit={handleSubmit}>
+            <h3>Payment Information</h3>
+            
+            <div className="form-group">
+              <label htmlFor="cardName">Cardholder Name</label>
+              <input
+                type="text"
+                id="cardName"
+                name="cardName"
+                value={formData.cardName}
+                onChange={handleInputChange}
+                required
+                placeholder="John Doe"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="cardNumber">Card Number</label>
+              <input
+                type="text"
+                id="cardNumber"
+                name="cardNumber"
+                value={formData.cardNumber}
+                onChange={handleInputChange}
+                required
+                placeholder="1234 5678 9012 3456"
+                maxLength="19"
+              />
+            </div>
+            
+            <div className="form-row">
               <div className="form-group">
-                <label htmlFor="cardName">Name on Card</label>
+                <label htmlFor="expiryDate">Expiry Date</label>
                 <input
                   type="text"
-                  id="cardName"
-                  name="cardName"
-                  value={formData.cardName}
+                  id="expiryDate"
+                  name="expiryDate"
+                  value={formData.expiryDate}
                   onChange={handleInputChange}
-                  placeholder="John Doe"
                   required
+                  placeholder="MM/YY"
+                  maxLength="5"
                 />
               </div>
               
               <div className="form-group">
-                <label htmlFor="cardNumber">Card Number</label>
+                <label htmlFor="cvv">CVV</label>
                 <input
                   type="text"
-                  id="cardNumber"
-                  name="cardNumber"
-                  value={formData.cardNumber}
+                  id="cvv"
+                  name="cvv"
+                  value={formData.cvv}
                   onChange={handleInputChange}
-                  placeholder="1234 5678 9012 3456"
                   required
+                  placeholder="123"
+                  maxLength="4"
                 />
               </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="expiryDate">Expiry Date</label>
-                  <input
-                    type="text"
-                    id="expiryDate"
-                    name="expiryDate"
-                    value={formData.expiryDate}
-                    onChange={handleInputChange}
-                    placeholder="MM/YY"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="cvv">CVV</label>
-                  <input
-                    type="text"
-                    id="cvv"
-                    name="cvv"
-                    value={formData.cvv}
-                    onChange={handleInputChange}
-                    placeholder="123"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label>Payment Method</label>
-                <div className="payment-methods">
-                  <label className="payment-method">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="credit_card"
-                      checked={formData.paymentMethod === 'credit_card'}
-                      onChange={handleInputChange}
-                    />
-                    <span>Credit Card</span>
-                  </label>
-                  <label className="payment-method">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="debit_card"
-                      checked={formData.paymentMethod === 'debit_card'}
-                      onChange={handleInputChange}
-                    />
-                    <span>Debit Card</span>
-                  </label>
-                </div>
-              </div>
-              
-              <div className="form-group total-section">
-                <div className="total-label">Total:</div>
-                <div className="total-amount">
-                  ${(course.discountPrice || course.price).toFixed(2)}
-                </div>
-              </div>
-              
-              <button 
-                type="submit" 
-                className="btn-complete-purchase"
-                disabled={processingPayment}
-              >
-                {processingPayment ? 'Processing...' : 'Complete Purchase'}
-              </button>
-              
-              <p className="secure-note">
-                <span className="lock-icon">🔒</span> All payments are secure and encrypted
-              </p>
-            </form>
-          </div>
+            </div>
+            
+            <button 
+              type="submit" 
+              className="btn-submit"
+              disabled={processingPayment}
+            >
+              {processingPayment ? 'Processing...' : 'Complete Purchase'}
+            </button>
+            
+            <p className="secure-notice">
+              🔒 Your payment information is secure and encrypted.
+            </p>
+            
+            <p className="demo-notice">
+              <strong>Demo Mode:</strong> This is a demonstration. No real payment will be processed.
+            </p>
+          </form>
         </div>
       </div>
     </div>

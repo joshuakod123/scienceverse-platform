@@ -176,7 +176,7 @@ const Dashboard = () => {
 
   const handleCourseClick = (courseId) => {
     // Navigate to course purchase or lesson page
-    navigate(`/purchase?course=${courseId}`);
+    navigate(`/courses/${courseId}`);
   };
 
   const handleLogout = () => {

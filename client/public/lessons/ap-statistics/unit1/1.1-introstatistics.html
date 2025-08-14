@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AP Statistics — Unit 1.1: Introducing Statistics</title>
+<style>
+  :root{
+    --bg:#0b0e13; --panel:#121722; --ink:#eef2ff; --muted:#a9b1c6;
+    --acc:#7aa2f7; --acc2:#bb9af7; --good:#3cc47c; --bad:#ff6b6b;
+    --line:rgba(255,255,255,.09);
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font:16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:var(--ink);
+       background:radial-gradient(1200px 600px at 70% -10%, #1b2336 0%, #0b0e13 60%)}
+  header{position:sticky; top:0; z-index:10; padding:24px 16px; text-align:center; background:linear-gradient(180deg, rgba(11,14,19,.92), rgba(11,14,19,.5) 60%, transparent); border-bottom:1px solid var(--line); backdrop-filter:saturate(1.2) blur(6px)}
+  h1{margin:0 0 6px; font-size:26px}
+  .sub{color:var(--muted); font-size:14px}
+  main{max-width:1100px; margin:18px auto 80px; padding:0 16px; display:grid; gap:18px}
+  section{background:linear-gradient(160deg, rgba(122,162,247,.07), rgba(187,154,247,.06)); border:1px solid rgba(122,162,247,.18); border-radius:16px; padding:18px}
+  h2{margin:0 0 8px; font-size:20px}
+  p,li{color:var(--muted)}
+  .pill{display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; background:linear-gradient(90deg, rgba(122,162,247,.35), rgba(187,154,247,.35)); border:1px solid rgba(122,162,247,.5); color:#e9edff; margin-right:6px}
+  .btn{appearance:none; border:1px solid rgba(255,255,255,.18); background:#0e1524; color:#eaf0ff; padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:700}
+  .btn.primary{background:linear-gradient(90deg, rgba(122,162,247,.28), rgba(187,154,247,.28))}
+  .btn.ghost{background:transparent}
+  .grid{display:grid; gap:14px}
+  .g2{grid-template-columns:repeat(2, minmax(0,1fr))}
+  @media (max-width:900px){.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px}
+  .small{font-size:12px; color:var(--muted)}
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; padding:2px 6px; background:#101725; border-radius:6px; border:1px solid var(--line)}
+  .choice{display:flex; gap:10px; align-items:center; margin:6px 0; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:#0a1020}
+  .choice.correct{border-color:rgba(60,196,124,.7)}
+  .choice.incorrect{border-color:rgba(255,107,107,.7)}
+  .why{font-size:13px; color:#d8deff; background:#0c1220; border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin-top:8px}
+  .sr-only{position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden}
+  .notice{font-size:12px; color:#cbd5ff}
+</style>
+</head>
+<body>
+<header>
+  <h1>Unit 1.1 — Introducing Statistics: What Can We Learn from Data?</h1>
+  <div class="sub">AP Statistics • Exploring One-Variable Data • Interactive Lesson</div>
+</header>
+<main>
+  <section aria-labelledby="goals">
+    <h2 id="goals">Learning Goals</h2>
+    <p>
+      <span class="pill">VAR-1</span>
+      <span class="pill">Skill 1.A</span>
+    </p>
+    <ul>
+      <li>Distinguish <em>statistical questions</em> (expect variability) from non-statistical ones.</li>
+      <li>Explain why numbers require <em>context</em> to be meaningful.</li>
+      <li>Recognize the role of data in answering questions about a group.</li>
+    </ul>
+    <p class="notice">Statistics studies how to collect, analyze, interpret, and present data.</p>
+  </section>
+
+  <section aria-labelledby="s1">
+    <h2 id="s1">Interactive — Is it a Statistical Question? (refined)</h2>
+    <p>For each prompt, choose <strong>Statistical</strong> or <strong>Not Statistical</strong>. Then open the <em>Why?</em> to see the reasoning. Finish with <strong>Grade</strong> to get feedback.</p>
+    <div class="grid g2" id="qGrid"></div>
+    <div style="display:flex; gap:10px; align-items:center; margin-top:10px">
+      <button class="btn primary" id="grade">Grade</button>
+      <button class="btn ghost" id="reset">Reset</button>
+      <span class="small">Keyboard: use <span class="kbd">Tab</span> to focus buttons, <span class="kbd">Enter</span> to toggle.</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="context">
+    <h2 id="context">Numbers Need Context</h2>
+    <p>Pick a context for the number <strong>7</strong> and read why the same number can mean very different things.</p>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+      <label>Context
+        <select id="ctx">
+          <option value="ph">pH = 7</option>
+          <option value="age">Age = 7</option>
+          <option value="rating">Rating = 7/10</option>
+          <option value="speed">Speed = 7 m/s</option>
+        </select>
+      </label>
+      <button class="btn" id="explain">Explain</button>
+    </div>
+    <div class="card" id="ctxOut" style="margin-top:10px"></div>
+  </section>
+
+  <section aria-labelledby="exit">
+    <h2 id="exit">Exit Ticket</h2>
+    <div class="card">
+      <div class="choice"><input type="radio" name="e1" value="A" id="e1A"><label for="e1A">A. What is my score on today’s quiz?</label></div>
+      <div class="choice"><input type="radio" name="e1" value="B" id="e1B"><label for="e1B">B. What are the quiz scores of students in this class?</label></div>
+      <div class="choice"><input type="radio" name="e1" value="C" id="e1C"><label for="e1C">C. Is 7 a big number?</label></div>
+      <p class="small">Choose the <em>statistical</em> question.</p>
+    </div>
+    <button class="btn" id="checkExit">Check</button>
+  </section>
+</main>
+
+<script>
+// ----- Data for the refined activity -----
+const items = [
+  { prompt:"How many push-ups can tenth-graders do in one minute?", isStat:true,
+    why:"Many different students → many possible values. We'd collect data and expect variability." },
+  { prompt:"How many letters are in the word 'data'?", isStat:false,
+    why:"There's only one correct, fixed answer. No variability across a population." },
+  { prompt:"What percentage of households in our town own a pet?", isStat:true,
+    why:"Different households differ. We'd sample households; results vary with who we ask." },
+  { prompt:"What is my heart rate at this moment?", isStat:false,
+    why:"Refers to a single individual at a single time → not about variation across a group." },
+  { prompt:"How long are commute times (minutes) for students at our school?", isStat:true,
+    why:"Commutes vary widely across students and days. A distribution of values is expected." },
+  { prompt:"Is 7 a big number?", isStat:false,
+    why:"Without context (units, variable, group) the number is meaningless; not a statistical question." }
+];
+
+function renderCards(){
+  const grid = document.getElementById('qGrid');
+  grid.innerHTML='';
+  items.forEach((x, idx)=>{
+    const card=document.createElement('article');
+    card.className='card';
+    card.innerHTML = `
+      <h3 style="margin:0 0 6px">${idx+1}. ${x.prompt}</h3>
+      <div role="group" aria-label="Choose statistical or not" style="display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn" data-choice="stat">Statistical</button>
+        <button class="btn" data-choice="not">Not Statistical</button>
+        <span class="small" data-state>—</span>
+      </div>
+      <details class="why"><summary>Why?</summary><div>${x.why}</div></details>
+    `;
+    const state = card.querySelector('[data-state]');
+    card.querySelectorAll('button[data-choice]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const pick = btn.dataset.choice; // 'stat' or 'not'
+        card.dataset.pick = pick;
+        state.textContent = `You chose: ${pick==='stat'?'Statistical':'Not Statistical'}`;
+      });
+    });
+    grid.appendChild(card);
+  });
+}
+
+function grade(){
+  document.querySelectorAll('#qGrid .card').forEach((card, i)=>{
+    const correct = items[i].isStat ? 'stat' : 'not';
+    const pick = card.dataset.pick;
+    card.querySelectorAll('.choice').forEach(c=>c.classList.remove('correct','incorrect'));
+    // Visual border feedback
+    if(!pick){ card.style.borderColor='var(--line)'; return; }
+    card.style.borderColor = pick===correct ? 'rgba(60,196,124,.7)' : 'rgba(255,107,107,.7)';
+  });
+}
+
+// Context explainer
+const ctxExplain = {
+  ph: "pH = 7 describes a neutral solution (neither acidic nor basic). Without saying 'pH', the number 7 tells us nothing about acidity.",
+  age: "Age = 7 means a seven-year-old person (or thing). Among adults, 7 would be an extreme outlier.",
+  rating: "Rating = 7/10 suggests a qualitatively 'good' evaluation on a 10-point scale. On a 5-point scale it would be impossible.",
+  speed: "Speed = 7 m/s ≈ 25.2 km/h. For a runner that’s fast; for a car that’s very slow. Units and context change meaning."
+};
+
+function explain(){
+  const sel = document.getElementById('ctx');
+  document.getElementById('ctxOut').textContent = ctxExplain[sel.value];
+}
+
+function checkExit(){
+  const pick = document.querySelector('input[name="e1"]:checked');
+  const cards = document.querySelectorAll('.card .choice');
+  cards.forEach(c=>c.classList.remove('correct','incorrect'));
+  if(!pick) return;
+  const v = pick.value;
+  const label = pick.closest('.choice');
+  if(v==='B') label.classList.add('correct'); else label.classList.add('incorrect');
+}
+
+// Init
+renderCards();
+document.getElementById('grade').addEventListener('click', grade);
+document.getElementById('reset').addEventListener('click', renderCards);
+document.getElementById('explain').addEventListener('click', explain);
+document.getElementById('ctxOut').textContent = ctxExplain['ph'];
+document.getElementById('checkExit').addEventListener('click', checkExit);
+</script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+// File: client/src/App.js
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -8,7 +10,8 @@ import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
-// DiscoverPage import 제거
+import DiscoverPage from './pages/DiscoverPage';
+import CourseDetailPage from './pages/CourseDetailPage';
 import LessonPage from './pages/LessonPage';
 import ProfilePage from './pages/ProfilePage';
 import PurchasePage from './pages/PurchasePage';
@@ -52,8 +55,11 @@ function App() {
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/home" element={<HomePage />} />
                   <Route path="/auth" element={<AuthPage />} />
-                  {/* /discover 라우트 제거 */}
+                  <Route path="/discover" element={<DiscoverPage />} />
                   <Route path="/survey" element={<SurveyPage />} />
+                  
+                  {/* Course Detail Page - Can be accessed by anyone */}
+                  <Route path="/courses/:courseId" element={<CourseDetailPage />} />
                   
                   {/* Protected Routes */}
                   <Route
