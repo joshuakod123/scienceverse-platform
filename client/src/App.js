@@ -1,4 +1,4 @@
-// File: client/src/App.js
+// 파일 경로: client/src/App.js
 
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -49,7 +49,6 @@ function App() {
               </div>
             )}
             <div className={`App ${isLoaded ? 'loaded' : ''}`}>
-              {/* Development Tools - 개발 환경에서만 표시 */}
               {process.env.NODE_ENV === 'development' && <DevTools />}
               
               <main>
@@ -61,7 +60,6 @@ function App() {
                   <Route path="/discover" element={<DiscoverPage />} />
                   <Route path="/survey" element={<SurveyPage />} />
                   
-                  {/* Course Detail Page - Can be accessed by anyone */}
                   <Route path="/courses/:courseId" element={<CourseDetailPage />} />
 
                   {/* Specific Lesson Route for AP Statistics 1.1 */}

@@ -1,3 +1,5 @@
+// File: client/src/pages/DiscoverPage.js
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,9 +13,8 @@ const DiscoverPage = () => {
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Course data for high school students focusing on AP subjects
+  // AP 과목만 포함된 코스 데이터 (AP Physics 2, Pre-Calculus, Algebra 2 제거됨)
   const allCourses = useMemo(() => [
-    // AP Statistics (Newly Added)
     {
       id: 'ap-statistics',
       title: 'AP Statistics',
@@ -36,13 +37,12 @@ const DiscoverPage = () => {
       bestseller: true,
       apCourse: true
     },
-    // Other courses... (rest of the courses array remains the same as previous answer)
     {
       id: 'ap-physics-1',
       title: 'AP Physics 1',
       subtitle: 'Algebra-based Physics',
       category: 'Physics',
-      level: 'Beginner',
+      level: 'Intermediate',
       duration: '32 Weeks',
       price: 'Free',
       originalPrice: null,
@@ -60,42 +60,20 @@ const DiscoverPage = () => {
       apCourse: true
     },
     {
-      id: 'ap-physics-2',
-      title: 'AP Physics 2',
-      subtitle: 'Advanced Algebra-based Physics',
-      category: 'Physics',
-      level: 'Intermediate',
-      duration: '32 Weeks',
-      price: 'Free',
-      originalPrice: null,
-      rating: 4.8,
-      studentsEnrolled: 12100,
-      instructor: 'Dr. Ken Physics',
-      description: 'Covers fluid dynamics, thermodynamics, electromagnetism, optics, and atomic physics.',
-      thumbnail: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      icon: '🔬',
-      features: ['Advanced Experiments', 'AP Exam Prep', 'University Physics Prep'],
-      difficulty: 85,
-      popular: true,
-      new: false,
-      bestseller: false,
-      apCourse: true
-    },
-    {
       id: 'ap-physics-c-mechanics',
       title: 'AP Physics C: Mechanics',
       subtitle: 'Calculus-based Mechanics',
       category: 'Physics',
       level: 'Advanced',
-      duration: '16 Weeks',
+      duration: '18 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.9,
       studentsEnrolled: 8920,
-      instructor: 'Dr. Park Mechanics',
+      instructor: 'Dr. Newton',
       description: 'In-depth study of mechanics using calculus, covering motion, force, energy, and momentum.',
       thumbnail: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      icon: '📐',
+      icon: '🚀',
       features: ['Calculus Application', 'Advanced Problem Solving', 'Full AP Exam Prep'],
       difficulty: 95,
       popular: false,
@@ -109,12 +87,12 @@ const DiscoverPage = () => {
       subtitle: 'Calculus-based Electricity & Magnetism',
       category: 'Physics',
       level: 'Advanced',
-      duration: '16 Weeks',
+      duration: '18 Weeks',
       price: 'Free',
       originalPrice: null,
       rating: 4.8,
       studentsEnrolled: 6540,
-      instructor: 'Dr. Lee Electronics',
+      instructor: 'Dr. Maxwell',
       description: 'Electricity and magnetism using calculus, up to Maxwell\'s equations.',
       thumbnail: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       icon: '⚡',
@@ -136,7 +114,7 @@ const DiscoverPage = () => {
       originalPrice: null,
       rating: 4.9,
       studentsEnrolled: 18750,
-      instructor: 'Prof. Jane Math',
+      instructor: 'Prof. Leibniz',
       description: 'From basics to applications of limits, differentiation, and integration. Corresponds to university Calculus 1.',
       thumbnail: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
       icon: '∫',
@@ -158,7 +136,7 @@ const DiscoverPage = () => {
       originalPrice: null,
       rating: 4.8,
       studentsEnrolled: 14200,
-      instructor: 'Prof. Han Series',
+      instructor: 'Prof. Euler',
       description: 'Covers all AB topics plus advanced calculus subjects like series, parametric functions, and polar coordinates.',
       thumbnail: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
       icon: '∞',
@@ -168,68 +146,28 @@ const DiscoverPage = () => {
       new: false,
       bestseller: false,
       apCourse: true
-    },
-    {
-      id: 'precalculus',
-      title: 'Pre-Calculus',
-      subtitle: 'Foundation for Calculus',
-      category: 'Mathematics',
-      level: 'Beginner',
-      duration: '24 Weeks',
-      price: 'Free',
-      originalPrice: null,
-      rating: 4.7,
-      studentsEnrolled: 22100,
-      instructor: 'Prof. Kim Foundation',
-      description: 'Essential topics for calculus preparation, including trigonometry, exponential, and logarithmic functions.',
-      thumbnail: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
-      icon: '📊',
-      features: ['Solid Foundation', 'Visual Learning', 'Calculus Connection'],
-      difficulty: 60,
-      popular: true,
-      new: false,
-      bestseller: false,
-      apCourse: false
-    },
-    {
-      id: 'algebra-2',
-      title: 'Algebra 2',
-      subtitle: 'Advanced Algebraic Concepts',
-      category: 'Mathematics',
-      level: 'Beginner',
-      duration: '24 Weeks',
-      price: 'Free',
-      originalPrice: null,
-      rating: 4.6,
-      studentsEnrolled: 19800,
-      instructor: 'Prof. Park Algebra',
-      description: 'Learn advanced algebraic concepts such as quadratic functions, polynomials, and exponential functions.',
-      thumbnail: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
-      icon: '📈',
-      features: ['Step-by-step Learning', 'Problem Solving', 'Pre-Calc Prep'],
-      difficulty: 50,
-      popular: false,
-      new: false,
-      bestseller: false,
-      apCourse: false
     }
   ], []);
 
-  const categories = useMemo(() => ['All', 'Physics', 'Mathematics'], []);
-  const levels = useMemo(() => ['All', 'Beginner', 'Intermediate', 'Advanced'], []);
+  // Category and level options
+  const categories = ['All', 'Physics', 'Mathematics'];
+  const levels = ['All', 'Intermediate', 'Advanced'];
 
-  // Calculate filtered courses
+  // Filter courses based on search and filters
   useEffect(() => {
-    let filtered = allCourses;
+    let filtered = [...allCourses];
 
+    // Apply category filter
     if (selectedCategory !== 'All') {
       filtered = filtered.filter(course => course.category === selectedCategory);
     }
 
+    // Apply level filter
     if (selectedLevel !== 'All') {
       filtered = filtered.filter(course => course.level === selectedLevel);
     }
 
+    // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(course =>
         course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -239,9 +177,9 @@ const DiscoverPage = () => {
     }
 
     setFilteredCourses(filtered);
-  }, [selectedCategory, selectedLevel, searchTerm, allCourses]);
+  }, [allCourses, selectedCategory, selectedLevel, searchTerm]);
 
-  // Initial loading
+  // Simulate loading
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -249,46 +187,46 @@ const DiscoverPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleCourseClick = (courseId) => {
-    // 경로를 /courses/ 로 수정
-    navigate(`/courses/${courseId}`);
-  };
-  
-  // renderCourseCard 함수 및 나머지 코드는 이전 답변과 동일합니다...
+  // Render course card
   const renderCourseCard = (course) => (
     <motion.div
       key={course.id}
-      className="course-card"
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      whileHover={{ scale: 1.02, y: -5 }}
+      whileHover={{ y: -10 }}
       transition={{ duration: 0.3 }}
-      onClick={() => handleCourseClick(course.id)}
+      onClick={() => navigate(`/courses/${course.id}`)}
       style={{
         background: course.thumbnail,
-        cursor: 'pointer',
-        borderRadius: '16px',
+        borderRadius: '20px',
         padding: '24px',
-        color: 'white',
+        cursor: 'pointer',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
         position: 'relative',
         overflow: 'hidden',
         minHeight: '300px',
+        color: 'white',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between'
       }}
     >
-      {/* Badges */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+      {/* Tags */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '8px', 
+        marginBottom: '16px',
+        flexWrap: 'wrap'
+      }}>
         {course.apCourse && (
           <span style={{
             background: 'rgba(255, 255, 255, 0.9)',
-            color: '#1a202c',
-            padding: '4px 8px',
+            color: '#333',
+            padding: '4px 10px',
             borderRadius: '12px',
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: 'bold'
           }}>
             AP
@@ -296,11 +234,11 @@ const DiscoverPage = () => {
         )}
         {course.popular && (
           <span style={{
-            background: 'rgba(255, 193, 7, 0.9)',
-            color: '#1a202c',
-            padding: '4px 8px',
+            background: '#FFA726',
+            color: 'white',
+            padding: '4px 10px',
             borderRadius: '12px',
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: 'bold'
           }}>
             Popular
@@ -308,11 +246,11 @@ const DiscoverPage = () => {
         )}
         {course.new && (
           <span style={{
-            background: 'rgba(34, 197, 94, 0.9)',
+            background: '#66BB6A',
             color: 'white',
-            padding: '4px 8px',
+            padding: '4px 10px',
             borderRadius: '12px',
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: 'bold'
           }}>
             New
@@ -320,8 +258,12 @@ const DiscoverPage = () => {
         )}
       </div>
 
-      {/* Course Icon */}
-      <div style={{ fontSize: '48px', marginBottom: '16px' }}>
+      {/* Icon */}
+      <div style={{ 
+        fontSize: '48px', 
+        marginBottom: '16px',
+        filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))'
+      }}>
         {course.icon}
       </div>
 
@@ -393,8 +335,8 @@ const DiscoverPage = () => {
             width: `${course.difficulty}%`,
             height: '100%',
             background: 'rgba(255, 255, 255, 0.8)',
-            transition: 'width 0.3s ease'
-          }} />
+            borderRadius: '2px'
+          }}></div>
         </div>
       </div>
     </motion.div>
@@ -402,13 +344,12 @@ const DiscoverPage = () => {
 
   if (isLoading) {
     return (
-      <div style={{
-        position: 'relative',
-        minHeight: '100vh',
+      <div style={{ 
+        minHeight: '100vh', 
+        background: 'linear-gradient(135deg, #0a0e27 0%, #1a1e3a 100%)',
         display: 'flex',
-        justifyContent: 'center',
         alignItems: 'center',
-        color: 'white'
+        justifyContent: 'center'
       }}>
         <SpaceCanvas />
         <motion.div
@@ -416,45 +357,48 @@ const DiscoverPage = () => {
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           style={{ fontSize: '48px' }}
         >
-          🌌
+          ⚛️
         </motion.div>
-        <h2 style={{ marginLeft: '16px' }}>Loading Courses...</h2>
       </div>
     );
   }
 
   return (
-    <div style={{
-      position: 'relative',
-      minHeight: '100vh',
-      color: 'white',
-      padding: '20px'
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #0a0e27 0%, #1a1e3a 100%)',
+      padding: '20px',
+      color: 'white'
     }}>
       <SpaceCanvas />
-      
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         style={{
-          position: 'relative',
-          zIndex: 10,
           textAlign: 'center',
-          marginBottom: '40px'
+          marginBottom: '40px',
+          position: 'relative',
+          zIndex: 10
         }}
       >
         <h1 style={{ 
           fontSize: '48px', 
-          fontWeight: 'bold', 
+          fontWeight: 'bold',
           marginBottom: '16px',
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
         }}>
           Explore AP Courses
         </h1>
-        <p style={{ fontSize: '18px', opacity: 0.9 }}>
+        <p style={{ 
+          fontSize: '18px', 
+          opacity: 0.8 
+        }}>
           Master AP Physics and AP Calculus for high school students!
         </p>
       </motion.div>
