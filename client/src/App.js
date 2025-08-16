@@ -1,4 +1,4 @@
-// 파일 경로: client/src/App.js
+// File: client/src/App.js
 
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -18,7 +18,6 @@ import PurchasePage from './pages/PurchasePage';
 import SurveyPage from './pages/SurveyPage';
 
 // Lesson Components
-import IntroStatistics from './courses/ap-statistics/unit-1/1.1- IntroStatistics';
 
 // Components
 import ProtectedRoute from './components/Auth/ProtectedRoute';
@@ -49,6 +48,7 @@ function App() {
               </div>
             )}
             <div className={`App ${isLoaded ? 'loaded' : ''}`}>
+              {/* Development Tools - 개발 환경에서만 표시 */}
               {process.env.NODE_ENV === 'development' && <DevTools />}
               
               <main>
@@ -60,17 +60,11 @@ function App() {
                   <Route path="/discover" element={<DiscoverPage />} />
                   <Route path="/survey" element={<SurveyPage />} />
                   
+                  {/* Course Detail Page - Can be accessed by anyone */}
                   <Route path="/courses/:courseId" element={<CourseDetailPage />} />
 
                   {/* Specific Lesson Route for AP Statistics 1.1 */}
-                  <Route 
-                    path="/courses/ap-statistics/lessons/1.1"
-                    element={
-                      <ProtectedRoute>
-                        <IntroStatistics />
-                      </ProtectedRoute>
-                    }
-                  />
+                
                   
                   {/* Protected Routes */}
                   <Route
